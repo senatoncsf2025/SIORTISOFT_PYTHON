@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
@@ -18,7 +19,7 @@
 
         <div class="row g-4">
             <div class="col-md-4">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'personal.index' %}" class="text-decoration-none text-dark">
                     <div class="card dashboard-card text-center" id="cardUsuarios">
                         <div class="card-body">
                             <h5 class="card-title">Personal</h5>
@@ -28,7 +29,7 @@
             </div>
 
             <div class="col-md-4">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'estudiantes.index' %}" class="text-decoration-none text-dark">
                     <div class="card dashboard-card text-center" id="cardEstudiantes">
                         <div class="card-body">
                             <h5 class="card-title">Estudiantes</h5>
@@ -38,7 +39,7 @@
             </div>
 
             <div class="col-md-4">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'docentes.index' %}" class="text-decoration-none text-dark">
                     <div class="card dashboard-card text-center" id="cardDocentes">
                         <div class="card-body">
                             <h5 class="card-title">Docentes</h5>
@@ -52,7 +53,7 @@
             </div>
 
             <div class="col-md-4">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'oficinas.index' %}" class="text-decoration-none text-dark">
                     <div class="card dashboard-card text-center" id="cardOficinas">
                         <div class="card-body">
                             <h5 class="card-title">Oficinas</h5>
@@ -62,7 +63,7 @@
             </div>
 
             <div class="col-md-4">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'vigilantes.index' %}" class="text-decoration-none text-dark">
                     <div class="card dashboard-card text-center" id="cardVigilantes">
                         <div class="card-body">
                             <h5 class="card-title">Vigilantes</h5>
@@ -72,7 +73,7 @@
             </div>
 
             <div class="col-md-4">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'enfermeria.index' %}" class="text-decoration-none text-dark">
                     <div class="card dashboard-card text-center" id="cardEnfermeria">
                         <div class="card-body">
                             <h5 class="card-title">Enfermería</h5>
@@ -86,7 +87,7 @@
             </div>
 
             <div class="col-md-4">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'parqueadero.index' %}" class="text-decoration-none text-dark">
                     <div class="card dashboard-card text-center" id="cardParqueadero">
                         <div class="card-body">
                             <h5 class="card-title">Parqueadero</h5>
@@ -96,7 +97,7 @@
             </div>
 
             <div class="col-md-4">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'visitantes.index' %}" class="text-decoration-none text-dark">
                     <div class="card dashboard-card text-center" id="cardVisitantes">
                         <div class="card-body">
                             <h5 class="card-title">Visitantes</h5>
@@ -105,15 +106,16 @@
                 </a>
             </div>
 
-           <div class="col-md-4">
-    <a href="{% url 'acudientes.index' %}" class="text-decoration-none text-dark"></a>
-        <div class="card dashboard-card text-center" id="cardAcudientes">
-            <div class="card-body">
-                <h5 class="card-title">Acudientes</h5>
+            <div class="col-md-4">
+                <a href="{% url 'acudientes.index' %}" class="text-decoration-none text-dark">
+                    <div class="card dashboard-card text-center" id="cardAcudientes">
+                        <div class="card-body">
+                            <h5 class="card-title">Acudientes</h5>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
-    </a>
-</div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

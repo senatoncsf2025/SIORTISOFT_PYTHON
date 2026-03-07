@@ -7,7 +7,7 @@
 <div class="container py-5">
     <h1 class="mb-4">Gestión de {{ rol|capfirst }}</h1>
 
-    <a href="{% url create_url_name %}" class="btn btn-success mb-3">
+    <a href="{% url 'acudientes.create' %}" class="btn btn-success mb-3">
         + Nuevo {{ rol_singular|capfirst }}
     </a>
 
@@ -34,7 +34,7 @@
         </thead>
         <tbody>
             {% for usuario in usuarios %}
-            <tr data-id="{{ usuario.id }}">
+            <tr>
                 <td>{{ usuario.nombre }}</td>
                 <td>{{ usuario.apellido }}</td>
                 <td>{{ usuario.cedula }}</td>
@@ -56,48 +56,30 @@
                         -
                     {% endif %}
                 </td>
-                <td class="estado">
+                <td>
                     {% if usuario.activo %}
                         <span class="badge bg-success">Activo</span>
                     {% else %}
                         <span class="badge bg-secondary">Inactivo</span>
                     {% endif %}
                 </td>
-                <td class="acciones">
-                    <a href="{% url edit_url_name usuario.id %}" class="btn btn-warning btn-sm">Editar</a>
-
-                    {% if usuario.activo %}
-                        <button
-                            type="button"
-                            class="btn btn-danger btn-sm toggle-estado"
-                            data-url="{% url inactivar_url_name usuario.id %}"
-                            data-action="inactivar">
-                            Inactivar
-                        </button>
-                    {% else %}
-                        <button
-                            type="button"
-                            class="btn btn-success btn-sm toggle-estado"
-                            data-url="{% url activar_url_name usuario.id %}"
-                            data-action="activar">
-                            Activar
-                        </button>
-                    {% endif %}
+                <td>
+                    <button class="btn btn-secondary btn-sm" disabled>Editar</button>
+                    <button class="btn btn-secondary btn-sm" disabled>Estado</button>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="10">No hay registros</td>
+                <td colspan="10" class="text-center">No hay registros</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-<!-- Modal de filtros -->
 <div class="modal fade" id="filtroReporteModal" tabindex="-1" aria-labelledby="filtroReporteLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form action="{% url reporte_url_name %}" method="GET" target="_blank">
+        <form action="{% url 'acudientes.reporte' %}" method="GET" target="_blank">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="filtroReporteLabel">Filtros para el reporte</h5>
@@ -168,94 +150,4 @@
         </form>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-function toggleEstadoHandler(event) {
-    const button = event.currentTarget;
-    const url = button.dataset.url;
-    const action = button.dataset.action;
-    const row = button.closest('tr');
-    const estadoCell = row.querySelector('.estado');
-    const accionesCell = row.querySelector('.acciones');
-
-    if (!confirm(`¿Seguro que deseas ${action} este registro?`)) return;
-
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({})
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('alert-container').innerHTML = `
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    ${data.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-
-            const userId = row.dataset.id;
-            const editBaseUrl = "{{ edit_base_url }}";
-            const activarBaseUrl = "{{ activar_base_url }}";
-            const inactivarBaseUrl = "{{ inactivar_base_url }}";
-
-            if (action === 'inactivar') {
-                estadoCell.innerHTML = '<span class="badge bg-secondary">Inactivo</span>';
-                accionesCell.innerHTML = `
-                    <a href="${editBaseUrl}${userId}/" class="btn btn-warning btn-sm">Editar</a>
-                    <button type="button" class="btn btn-success btn-sm toggle-estado"
-                        data-url="${activarBaseUrl}${userId}/"
-                        data-action="activar">Activar</button>
-                `;
-            } else {
-                estadoCell.innerHTML = '<span class="badge bg-success">Activo</span>';
-                accionesCell.innerHTML = `
-                    <a href="${editBaseUrl}${userId}/" class="btn btn-warning btn-sm">Editar</a>
-                    <button type="button" class="btn btn-danger btn-sm toggle-estado"
-                        data-url="${inactivarBaseUrl}${userId}/"
-                        data-action="inactivar">Inactivar</button>
-                `;
-            }
-
-            accionesCell.querySelectorAll('.toggle-estado').forEach(btn => {
-                btn.addEventListener('click', toggleEstadoHandler);
-            });
-
-            setTimeout(() => {
-                const alert = document.querySelector('.alert');
-                if (alert) alert.classList.remove('show');
-            }, 5000);
-        }
-    })
-    .catch(() => alert("Error al procesar la solicitud"));
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.toggle-estado').forEach(button => {
-        button.addEventListener('click', toggleEstadoHandler);
-    });
-});
-</script>
 {% endblock %}
