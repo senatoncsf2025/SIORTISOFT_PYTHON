@@ -62,7 +62,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'siortisoft',
         'USER': 'root',
-        'PASSWORD': '123456789',
+        'PASSWORD': 'suarez1034661670',
         'HOST': 'localhost',
         'PORT': '3306',
     }
