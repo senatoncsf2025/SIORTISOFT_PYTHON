@@ -1,0 +1,186 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fondo y centrado */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #1f1c2c, #928dab);
+    color: #fff;
+}
+
+/* Contenedor central */
+.container {
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 50px 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Título */
+h1 {
+    margin-bottom: 40px;
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+}
+
+/* Grupo de botones */
+.button-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Botones generales */
+.btn {
+    text-decoration: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+/* Botón Iniciar Sesión */
+.btn-login {
+    background-color: #ffb347;
+    color: #1f1c2c;
+}
+
+.btn-login:hover {
+    background-color: #ffcc70;
+    transform: translateY(-3px);
+}
+
+/* Botón Registrarse */
+.btn-register {
+    background-color: #1f1c2c;
+    border: 2px solid #ffb347;
+    color: #ffb347;
+}
+
+.btn-register:hover {
+    background-color: #ffb347;
+    color: #1f1c2c;
+    transform: translateY(-3px);
+}
+     
+
+/* Login */
+
+/* RESET BÁSICO */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* FONDO DE PANTALLA COMPLETA */
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: #fff;
+}
+
+/* CARD DEL LOGIN */
+.login-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 40px 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    width: 350px;
+    max-width: 90%;
+    text-align: center;
+}
+
+/* TÍTULO */
+.login-card h1 {
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+/* INPUTS */
+.login-card input[type="text"],
+.login-card input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0 20px 0;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.login-card input:focus {
+    outline: none;
+    background: rgba(255,255,255,0.2);
+}
+
+/* BOTÓN */
+.login-card button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #ff6b6b;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-card button:hover {
+    background: #ff5252;
+}
+
+/* LINKS */
+.login-card .links {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.login-card .links a {
+    color: #ffd700;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.login-card .links a:hover {
+    text-decoration: underline;
+}
+
+/* ERROR MESSAGE */
+.login-card .error {
+    color: #ff4c4c;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* RESPONSIVE */
+@media screen and (max-width: 400px) {
+    .login-card {
+        padding: 30px 20px;
+    }
+
+    .login-card h1 {
+        font-size: 24px;
+    }
+}
