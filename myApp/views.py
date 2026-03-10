@@ -65,17 +65,15 @@ def login_view(request):
             return redirect("index2")
         else:
             messages.error(request, "Usuario o contraseña incorrectos")
-            return render(request, "login.html", {"username": username})
+            return render(request, "auth/login.html", {"username": username})
 
-    return render(request, "login.html")
+    return render(request, "auth/login.html")
 
 
 def logout_view(request):
     logout(request)
     messages.info(request, "Has cerrado sesión correctamente")
     return redirect("login")
-
-
 
 
 def register_view(request):
@@ -87,20 +85,20 @@ def register_view(request):
 
         if password != password2:
             messages.error(request, "Las contraseñas no coinciden")
-            return render(request, "register.html", {
+            return render(request, "auth/register.html", {
                 "username": username,
                 "email": email
             })
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "El usuario ya existe")
-            return render(request, "register.html", {
+            return render(request, "auth/register.html", {
                 "email": email
             })
 
         if User.objects.filter(email=email).exists():
             messages.error(request, "El email ya está registrado")
-            return render(request, "register.html", {
+            return render(request, "auth/register.html", {
                 "username": username
             })
 
@@ -113,4 +111,4 @@ def register_view(request):
         messages.success(request, "Usuario creado correctamente. Ya puedes iniciar sesión")
         return redirect("login")
 
-    return render(request, "register.html")
+    return render(request, "auth/register.html")

@@ -2,162 +2,326 @@
 /* ===== ESTILO GLOBAL ===== */
 /* ========================= */
 
-body{
-    background: linear-gradient(135deg,#0f172a,#1e293b);
-    min-height:100vh;
+body {
+    background: linear-gradient(135deg, #172554, #1e3a8a, #1e293b);
+    min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color:white;
+    color: #f8fbff;
 }
 
 /* ========================= */
 /* ===== TITULOS =========== */
 /* ========================= */
 
-h1{
-    font-weight:700;
-    color:#e2e8f0;
+h1 {
+    font-weight: 700;
+    color: #eff6ff;
 }
 
-h2{
-    color:#93c5fd;
-    font-weight:600;
+h2 {
+    color: #bfdbfe;
+    font-weight: 600;
 }
-
-
-/* ========================= */
-/* ===== TARJETAS DASHBOARD */
-/* ========================= */
-
-.dashboard-card{
-    background: linear-gradient(145deg,#1e293b,#0f172a);
-    border-radius:16px;
-    min-height:140px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border:1px solid rgba(59,130,246,0.2);
-
-    box-shadow:
-        0 6px 15px rgba(0,0,0,0.35),
-        inset 0 1px 0 rgba(255,255,255,0.05);
-
-    transition: all 0.25s ease;
-}
-
-
-/* Hover bonito */
-
-.dashboard-card:hover{
-    transform: translateY(-6px) scale(1.02);
-
-    box-shadow:
-        0 15px 30px rgba(0,0,0,0.6),
-        0 0 15px rgba(59,130,246,0.5);
-
-    border:1px solid rgba(96,165,250,0.5);
-}
-
-
-/* ========================= */
-/* ===== TEXTO TARJETAS ==== */
-/* ========================= */
-
-.card-title{
-    color:#e0f2fe;
-    font-weight:600;
-    font-size:1.2rem;
-}
-
 
 /* ========================= */
 /* ===== LINKS ============= */
 /* ========================= */
 
-a{
-    text-decoration:none;
-    color:inherit;
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
-
 /* ========================= */
-/* ===== EFECTO CLICK ===== */
+/* ===== EFECTO CLICK ====== */
 /* ========================= */
 
-.clickable{
-    cursor:pointer;
+.clickable {
+    cursor: pointer;
 }
 
-
 /* ========================= */
-/* ===== CONTENEDOR ======= */
+/* ===== CONTENEDORES ====== */
 /* ========================= */
 
-.container{
-    background: rgba(15,23,42,0.4);
-    backdrop-filter: blur(10px);
-    padding:40px;
-    border-radius:20px;
-    border:1px solid rgba(255,255,255,0.05);
+.hero-box,
+.contact-box {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    padding: 40px;
+    border-radius: 22px;
+    border: 1px solid rgba(191, 219, 254, 0.14);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22);
 }
 
+.hero-section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.contact-box {
+    margin-top: 1rem;
+}
+
+/* ========================= */
+/* ===== TARJETAS DASHBOARD */
+/* ========================= */
+
+.dashboard-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(191,219,254,0.06));
+    border-radius: 18px;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(191, 219, 254, 0.16);
+    box-shadow:
+        0 10px 24px rgba(15, 23, 42, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+    transition: all 0.25s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-6px) scale(1.015);
+    box-shadow:
+        0 18px 34px rgba(15, 23, 42, 0.24),
+        0 0 18px rgba(96, 165, 250, 0.18);
+    border: 1px solid rgba(147, 197, 253, 0.34);
+}
+
+.card-title {
+    color: #eff6ff;
+    font-weight: 600;
+    font-size: 1.15rem;
+}
 
 /* ========================= */
 /* ===== COLORES TARJETAS == */
 /* ========================= */
 
-/* puedes usar diferentes tonos */
-
-#cardUsuarios{
-    border-left:4px solid #3b82f6;
-}
-
-#cardEstudiantes{
-    border-left:4px solid #60a5fa;
-}
-
-#cardDocentes{
-    border-left:4px solid #2563eb;
-}
-
-#cardOficinas{
-    border-left:4px solid #1d4ed8;
-}
-
-#cardVigilantes{
-    border-left:4px solid #3b82f6;
-}
-
-#cardEnfermeria{
-    border-left:4px solid #60a5fa;
-}
-
-#cardParqueadero{
-    border-left:4px solid #2563eb;
-}
-
-#cardVisitantes{
-    border-left:4px solid #3b82f6;
-}
-
-#cardAcudientes{
-    border-left:4px solid #60a5fa;
-}
-
+#cardUsuarios { border-left: 4px solid #60a5fa; }
+#cardEstudiantes { border-left: 4px solid #93c5fd; }
+#cardDocentes { border-left: 4px solid #3b82f6; }
+#cardOficinas { border-left: 4px solid #2563eb; }
+#cardVigilantes { border-left: 4px solid #60a5fa; }
+#cardEnfermeria { border-left: 4px solid #93c5fd; }
+#cardParqueadero { border-left: 4px solid #3b82f6; }
+#cardVisitantes { border-left: 4px solid #60a5fa; }
+#cardAcudientes { border-left: 4px solid #93c5fd; }
 
 /* ========================= */
-/* ===== RESPONSIVE ======= */
+/* ===== BOTONES GENERALES = */
 /* ========================= */
 
-@media (max-width:768px){
+.btn-primary-custom,
+.btn-report-custom,
+.btn-login,
+.btn-soluciones,
+.btn-contacto {
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.28s ease;
+}
 
-    .dashboard-card{
-        min-height:110px;
+.btn-primary-custom *,
+.btn-report-custom *,
+.btn-login *,
+.btn-soluciones *,
+.btn-contacto * {
+    color: #ffffff !important;
+}
+
+/* Botón principal */
+.btn-primary-custom {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+    padding: 12px 22px;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.22);
+}
+
+.btn-primary-custom:hover {
+    background: linear-gradient(135deg, #60a5fa, #93c5fd) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(96, 165, 250, 0.28);
+}
+
+/* Botón reporte / secundario elegante */
+.btn-report-custom {
+    background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+    padding: 12px 22px;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.20);
+}
+
+.btn-report-custom:hover {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(59, 130, 246, 0.26);
+}
+
+/* ========================= */
+/* ===== FORMULARIOS ======= */
+/* ========================= */
+
+.contact-form-custom {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(191, 219, 254, 0.12);
+}
+
+.form-label {
+    color: #eaf3ff;
+    font-weight: 600;
+}
+
+.form-control-dark {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(191, 219, 254, 0.18);
+    color: #ffffff !important;
+    border-radius: 12px;
+}
+
+.form-control-dark:focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 0.2rem rgba(147, 197, 253, 0.22);
+}
+
+.form-control-dark::placeholder {
+    color: #dbeafe;
+    opacity: 1;
+}
+
+textarea.form-control-dark {
+    resize: vertical;
+}
+
+/* ========================= */
+/* ===== TEXTO HERO ======== */
+/* ========================= */
+
+.lead {
+    color: #dbeafe;
+    max-width: 950px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ========================= */
+/* ===== BOTONES HERO ====== */
+/* ========================= */
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 25px;
+}
+
+.hero-buttons .btn,
+.hero-buttons a,
+.hero-buttons a.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 230px;
+    padding: 14px 28px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: 14px;
+    border: none !important;
+    text-decoration: none;
+    color: #ffffff !important;
+    line-height: 1.2;
+}
+
+/* LOGIN */
+.btn-login {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+    box-shadow: 0 10px 22px rgba(59, 130, 246, 0.24);
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, #60a5fa, #93c5fd) !important;
+    color: #ffffff !important;
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(96, 165, 250, 0.30);
+}
+
+/* SOLUCIONES */
+.btn-soluciones {
+    background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.22);
+}
+
+.btn-soluciones:hover {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+    color: #ffffff !important;
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(59, 130, 246, 0.28);
+}
+
+/* CONTACTO */
+.btn-contacto {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+    box-shadow: 0 10px 22px rgba(29, 78, 216, 0.22);
+}
+
+.btn-contacto:hover {
+    background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+    color: #ffffff !important;
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(37, 99, 235, 0.28);
+}
+
+/* refuerzo de texto blanco */
+.hero-buttons .btn *,
+.hero-buttons .btn span,
+.hero-buttons .btn i,
+.hero-buttons a,
+.hero-buttons a:hover,
+.hero-buttons a:focus,
+.hero-buttons a:active {
+    color: #ffffff !important;
+}
+
+/* ========================= */
+/* ===== ALERTAS =========== */
+/* ========================= */
+
+.alert-success,
+.alert-danger {
+    border-radius: 12px;
+}
+
+/* ========================= */
+/* ===== RESPONSIVE ======== */
+/* ========================= */
+
+@media (max-width: 768px) {
+    .dashboard-card {
+        min-height: 110px;
     }
 
-    .card-title{
-        font-size:1rem;
+    .card-title {
+        font-size: 1rem;
     }
 
+    .hero-box,
+    .contact-box {
+        padding: 24px;
+    }
+
+    .hero-buttons .btn,
+    .hero-buttons a,
+    .hero-buttons a.btn {
+        width: 100%;
+        max-width: 320px;
+        min-width: unset;
+    }
 }
