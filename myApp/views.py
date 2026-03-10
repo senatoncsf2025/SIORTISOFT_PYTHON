@@ -49,23 +49,24 @@ def role_reporte(request, rol):
     return HttpResponse(f"Reporte de {rol}")
 
 
+from .models import Usuario
+
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect("index2")
-
     if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        password = request.POST.get("password", "").strip()
 
-        user = authenticate(request, username=username, password=password)
+        email = request.POST.get("email")
+        password = request.POST.get("password")
 
-        if user is not None:
-            login(request, user)
-            messages.success(request, f"¡Bienvenido {user.username}!")
+        try:
+            usuario = Usuario.objects.get(email=email, password=password)
+
+            request.session["usuario_id"] = usuario.id
+            request.session["usuario_nombre"] = usuario.nombre
+
             return redirect("index2")
-        else:
-            messages.error(request, "Usuario o contraseña incorrectos")
-            return render(request, "auth/login.html", {"username": username})
+
+        except Usuario.DoesNotExist:
+            messages.error(request, "Correo o contraseña incorrectos")
 
     return render(request, "auth/login.html")
 

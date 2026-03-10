@@ -2,48 +2,40 @@
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar sesión</title>
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
+
 <body>
 
-<div class="login-card">
-    <h1>Login</h1>
+    <div class="login-card">
+        <h1>Login</h1>
 
-    {% if messages %}
+        {% if messages %}
         {% for message in messages %}
-            <div class="error">{{ message }}</div>
+        <div class="error">{{ message }}</div>
         {% endfor %}
-    {% endif %}
+        {% endif %}
 
-    <form method="POST">
-        {% csrf_token %}
+        <form method="POST">
+            {% csrf_token %}
 
-        <input
-            type="text"
-            name="username"
-            placeholder="Usuario"
-            value="{{ username|default:'' }}"
-            required
-        >
+            <input type="email" name="email" placeholder="Correo" required>
 
-        <input
-            type="password"
-            name="password"
-            placeholder="Contraseña"
-            required
-        >
+            <input type="password" name="password" placeholder="Contraseña" required>
 
-        <button type="submit">Ingresar</button>
-    </form>
+            <button type="submit">Ingresar</button>
+        </form>
 
-    <div class="links">
-        <a href="#">Olvidé mi contraseña</a>
+        <div class="links">
+            <a href="#">Olvidé mi contraseña</a>
+        </div>
     </div>
-</div>
 
 </body>
+
 </html>
