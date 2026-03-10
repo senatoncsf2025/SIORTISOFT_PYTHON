@@ -60,9 +60,9 @@ WSGI_APPLICATION = 'SIORTISOFT.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'siortisoft',
+        'NAME': 'siortisoft1',
         'USER': 'root',
-        'PASSWORD': '123456789',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
     }

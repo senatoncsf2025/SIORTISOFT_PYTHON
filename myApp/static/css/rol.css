@@ -1,0 +1,104 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background: linear-gradient(135deg,#0a2a66,#1565c0,#42a5f5);
+}
+
+/* contenedor */
+.container{
+width:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+/* tarjeta */
+.login-card{
+background:white;
+width:360px;
+padding:40px;
+border-radius:12px;
+box-shadow:0 15px 35px rgba(0,0,0,0.2);
+text-align:center;
+}
+
+/* titulo */
+.login-card h1{
+color:#0d47a1;
+margin-bottom:8px;
+}
+
+/* subtitulo */
+.subtitle{
+color:#666;
+font-size:14px;
+margin-bottom:25px;
+}
+
+/* inputs */
+.input{
+width:100%;
+padding:12px;
+margin-bottom:15px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:14px;
+transition:0.3s;
+}
+
+.input:focus{
+border-color:#1976d2;
+outline:none;
+box-shadow:0 0 8px rgba(25,118,210,0.3);
+}
+
+/* boton */
+.btn-login{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+background:#1976d2;
+color:white;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+.btn-login:hover{
+background:#0d47a1;
+transform:translateY(-2px);
+}
+
+/* divisor */
+.divider{
+margin:25px 0;
+color:#aaa;
+font-size:13px;
+}
+
+/* texto final */
+.signup{
+font-size:13px;
+color:#666;
+}
+
+.signup a{
+color:#1976d2;
+text-decoration:none;
+font-weight:500;
+}
+
+.signup a:hover{
+text-decoration:underline;
+}

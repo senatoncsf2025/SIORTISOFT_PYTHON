@@ -1,5 +1,24 @@
 from django.db import models
 
+# ==== MANEJO DE ROLES ====
+class Rol(models.Model):
+
+    nombre = models.CharField(max_length=100, unique=True)
+    descripcion = models.TextField(blank=True, null=True)
+
+    # Permisos básicos del sistema
+    puede_crear = models.BooleanField(default=False)
+    puede_editar = models.BooleanField(default=False)
+    puede_eliminar = models.BooleanField(default=False)
+    puede_ver = models.BooleanField(default=True)
+
+    activo = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.nombre
 
 class Usuario(models.Model):
 
@@ -63,7 +82,14 @@ class Usuario(models.Model):
     # ===== AUTENTICACIÓN =====
 
     password = models.CharField(max_length=255, blank=True, null=True)
-    rol = models.IntegerField(blank=True, null=True)
+    
+    rol = models.ForeignKey(
+    Rol,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name="usuarios"
+)
 
     email_verified_at = models.DateTimeField(blank=True, null=True)
     telefono_verificado = models.BooleanField(default=False)
@@ -98,3 +124,4 @@ class Registro(models.Model):
 
     def __str__(self):
         return f"{self.usuario.nombre} - Entrada: {self.fecha_entrada}"
+    

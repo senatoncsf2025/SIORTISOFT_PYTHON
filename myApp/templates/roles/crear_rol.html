@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>Crear Rol</title>
+
+<link rel="stylesheet" href="{% static 'css/rol.css' %}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="login-card">
+
+        <h1>Crear Rol</h1>
+        <p class="subtitle">Registrar un nuevo rol en el sistema</p>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <input 
+                type="text" 
+                name="nombre" 
+                placeholder="Nombre del rol"
+                class="input"
+            >
+
+            <input 
+                type="text" 
+                name="descripcion" 
+                placeholder="Descripción del rol"
+                class="input"
+            >
+
+            <button type="submit" class="btn-login">
+                Guardar Rol
+            </button>
+
+        </form>
+
+        <div class="divider">
+            <span>Sistema SIORTISOFT</span>
+        </div>
+
+        <p class="signup">
+            <a href="/roles/">Volver a la lista de roles</a>
+        </p>
+
+    </div>
+
+</div>
+
+</body>
+</html>

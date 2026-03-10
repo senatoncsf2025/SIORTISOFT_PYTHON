@@ -1,0 +1,16 @@
+{% load static %}
+
+<link rel="stylesheet" href="">
+
+<h1>Lista de Roles</h1>
+
+<a href="/roles/crear/">Crear Rol</a>
+
+<ul>
+{% for rol in roles %}
+    <li>
+        {{ rol.nombre }} - {{ rol.descripcion }}
+        <a href="/roles/eliminar/{{ rol.id }}">Eliminar</a>
+    </li>
+{% endfor %}
+</ul>
