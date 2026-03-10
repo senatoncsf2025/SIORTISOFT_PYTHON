@@ -17,6 +17,8 @@ ROLES = [
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index2, name='home'),
+    path('register/', views.register, name='register'),
+    path('login/', views.login_view, name='login'),
 ]
 
 for rol in ROLES:

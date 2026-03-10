@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+        }
+        .register-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 { text-align: center; margin-bottom: 8px; color: #333; font-size: 28px; }
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a90e2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 24px 0 12px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 6px;
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        input, select {
+            width: 100%; padding: 11px 14px;
+            border: 1px solid #ddd; border-radius: 8px;
+            font-size: 14px; outline: none;
+            transition: border 0.3s; background: white;
+        }
+        input:focus, select:focus { border-color: #4a90e2; }
+        .full { grid-column: 1 / -1; }
+        button {
+            width: 100%; padding: 13px; background: #4a90e2;
+            color: white; border: none; border-radius: 8px;
+            font-size: 16px; cursor: pointer;
+            transition: background 0.3s; margin-top: 24px;
+        }
+        button:hover { background: #357abd; }
+        .links { text-align: center; margin-top: 16px; }
+        .links a { color: #4a90e2; text-decoration: none; font-size: 14px; }
+        .links a:hover { text-decoration: underline; }
+        .error {
+            background: #ffe0e0; color: #c0392b; padding: 10px;
+            border-radius: 6px; margin-bottom: 16px;
+            font-size: 14px; text-align: center;
+        }
+        .success {
+            background: #e0ffe0; color: #27ae60; padding: 10px;
+            border-radius: 6px; margin-bottom: 16px;
+            font-size: 14px; text-align: center;
+        }
+        label { font-size: 13px; color: #666; margin-bottom: 4px; display: block; }
+        .field { display: flex; flex-direction: column; }
+    </style>
+</head>
+<body>
+<div class="register-card">
+    <h1>Registro</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- DATOS PERSONALES -->
+        <div class="section-title">Datos Personales</div>
+        <div class="grid-2">
+            <div class="field">
+                <label>Nombre *</label>
+                <input type="text" name="nombre" placeholder="Nombre" value="{{ form.nombre|default:'' }}" required>
+            </div>
+            <div class="field">
+                <label>Apellido</label>
+                <input type="text" name="apellido" placeholder="Apellido" value="{{ form.apellido|default:'' }}">
+            </div>
+            <div class="field">
+                <label>Cédula *</label>
+                <input type="text" name="cedula" placeholder="Cédula" value="{{ form.cedula|default:'' }}" required>
+            </div>
+            <div class="field">
+                <label>Género</label>
+                <select name="genero">
+                    <option value="">-- Seleccionar --</option>
+                    <option value="Masculino" {% if form.genero == 'Masculino' %}selected{% endif %}>Masculino</option>
+                    <option value="Femenino" {% if form.genero == 'Femenino' %}selected{% endif %}>Femenino</option>
+                    <option value="Otro" {% if form.genero == 'Otro' %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Fecha de Nacimiento</label>
+                <input type="date" name="fecha_nacimiento" value="{{ form.fecha_nacimiento|default:'' }}">
+            </div>
+        </div>
+
+        <!-- CONTACTO -->
+        <div class="section-title">Contacto</div>
+        <div class="grid-2">
+            <div class="field full">
+                <label>Correo electrónico *</label>
+                <input type="email" name="email" placeholder="correo@ejemplo.com" value="{{ form.email|default:'' }}" required>
+            </div>
+            <div class="field">
+                <label>Teléfono *</label>
+                <input type="text" name="telefono" placeholder="Teléfono" value="{{ form.telefono|default:'' }}" required>
+            </div>
+            <div class="field">
+                <label>Dirección *</label>
+                <input type="text" name="direccion" placeholder="Dirección" value="{{ form.direccion|default:'' }}" required>
+            </div>
+        </div>
+
+        <!-- TIPO DE USUARIO -->
+        <div class="section-title">Tipo de Usuario</div>
+        <div class="grid-2">
+            <div class="field">
+                <label>Tipo de Usuario *</label>
+                <select name="tipo_usuario" required>
+                    <option value="">-- Seleccionar --</option>
+                    <option value="INTERNO" {% if form.tipo_usuario == 'INTERNO' %}selected{% endif %}>Interno</option>
+                    <option value="EXTERNO" {% if form.tipo_usuario == 'EXTERNO' %}selected{% endif %}>Externo</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Cargo</label>
+                <input type="text" name="cargo" placeholder="Cargo" value="{{ form.cargo|default:'' }}">
+            </div>
+            <div class="field">
+                <label>Código Vigilante</label>
+                <input type="text" name="codigo_vigilante" placeholder="Código vigilante" value="{{ form.codigo_vigilante|default:'' }}">
+            </div>
+        </div>
+
+        <!-- VISITANTES -->
+        <div class="section-title">Información de Visita</div>
+        <div class="grid-2">
+            <div class="field">
+                <label>Fecha de Visita</label>
+                <input type="date" name="fecha_visita" value="{{ form.fecha_visita|default:'' }}">
+            </div>
+            <div class="field">
+                <label>Horario</label>
+                <select name="horario">
+                    <option value="">-- Seleccionar --</option>
+                    <option value="AM" {% if form.horario == 'AM' %}selected{% endif %}>AM</option>
+                    <option value="PM" {% if form.horario == 'PM' %}selected{% endif %}>PM</option>
+                </select>
+            </div>
+            <div class="field full">
+                <label>Rol Externo</label>
+                <input type="text" name="rol_externo" placeholder="Rol externo" value="{{ form.rol_externo|default:'' }}">
+            </div>
+        </div>
+
+        <!-- AUTENTICACIÓN -->
+        <div class="section-title">Contraseña</div>
+        <div class="grid-2">
+            <div class="field">
+                <label>Contraseña *</label>
+                <input type="password" name="password1" placeholder="Contraseña" required>
+            </div>
+            <div class="field">
+                <label>Confirmar Contraseña *</label>
+                <input type="password" name="password2" placeholder="Confirmar contraseña" required>
+            </div>
+        </div>
+
+        <button type="submit">Registrarse</button>
+    </form>
+
+    <div class="links">
+        <a href="{% url 'login' %}">¿Ya tienes cuenta? Inicia sesión</a>
+    </div>
+</div>
+</body>
+</html>
