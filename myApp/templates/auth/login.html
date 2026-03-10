@@ -1,7 +1,6 @@
 {% load static %}
 
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -14,26 +13,36 @@
 <div class="login-card">
     <h1>Login</h1>
 
-```
-<form method="POST">
-    {% csrf_token %}
-
-    <input type="text" name="username" placeholder="Usuario" required>
-
-    <input type="password" name="password" placeholder="Contraseña" required>
-
-    <button type="submit">Ingresar</button>
-
-    {% if error %}
-    <div class="error">{{ error }}</div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="error">{{ message }}</div>
+        {% endfor %}
     {% endif %}
-</form>
 
-<div class="links">
-    <a href="#">Olvidé mi contraseña</a>
-</div>
-```
+    <form method="POST">
+        {% csrf_token %}
 
+        <input
+            type="text"
+            name="username"
+            placeholder="Usuario"
+            value="{{ username|default:'' }}"
+            required
+        >
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Contraseña"
+            required
+        >
+
+        <button type="submit">Ingresar</button>
+    </form>
+
+    <div class="links">
+        <a href="#">Olvidé mi contraseña</a>
+    </div>
 </div>
 
 </body>
