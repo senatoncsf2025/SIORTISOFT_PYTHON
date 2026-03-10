@@ -1,9 +1,68 @@
+# -----------------------------
+# Entornos virtuales
+# -----------------------------
 venv/
 env/
+ENV/
+.venv/
+
+# -----------------------------
+# Python
+# -----------------------------
 __pycache__/
 *.pyc
-db.sqlite3
-.env
+*.pyo
+*.pyd
+*.py[cod]
 
-# Ignorar configuración de Django
+# -----------------------------
+# Base de datos
+# -----------------------------
+db.sqlite3
+*.sqlite3
+
+# -----------------------------
+# Archivos de entorno
+# -----------------------------
+.env
+.env.*
+
+# -----------------------------
+# Configuración local Django
+# -----------------------------
 SIORTISOFT/settings.py
+
+# -----------------------------
+# Migraciones (opcional)
+# -----------------------------
+**/migrations/*
+!**/migrations/__init__.py
+
+# -----------------------------
+# Archivos estáticos generados
+# -----------------------------
+staticfiles/
+media/
+
+# -----------------------------
+# Archivos del sistema
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# Archivos de IDE / editores
+# -----------------------------
+.vscode/
+.idea/
+
+# -----------------------------
+# Logs
+# -----------------------------
+*.log
+
+# -----------------------------
+# Archivos temporales
+# -----------------------------
+*.tmp
+*.swp
