@@ -9,25 +9,23 @@
 }
 
 /* ========================= */
-/* ===== ESTILO GLOBAL ===== */
+/* ===== FONDO SOLO AUTH === */
 /* ========================= */
 
-body {
-    min-height: 100vh;
+.auth-page {
+    min-height: calc(100vh - 160px);
+    background: linear-gradient(135deg, #172554, #1e3a8a, #1e293b);
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #172554, #1e3a8a, #1e293b);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #f8fbff;
-    padding: 20px;
+    padding: 40px 20px;
 }
 
 /* ========================= */
 /* ===== LINKS ============= */
 /* ========================= */
 
-a {
+.auth-page a {
     text-decoration: none;
     color: inherit;
 }
@@ -36,7 +34,13 @@ a {
 /* ===== CONTENEDORES ====== */
 /* ========================= */
 
-.container,
+.auth-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .login-card {
     width: 100%;
     max-width: 420px;
@@ -47,15 +51,10 @@ a {
     border-radius: 22px;
     border: 1px solid rgba(191, 219, 254, 0.14);
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22);
+    color: #f8fbff;
 }
 
-/* ========================= */
-/* ===== TITULOS =========== */
-/* ========================= */
-
-h1,
-.login-card h1,
-.container h1 {
+.auth-page .login-card h1 {
     margin-bottom: 30px;
     font-size: 2rem;
     font-weight: 700;
@@ -78,7 +77,6 @@ h1,
 /* ===== BOTONES =========== */
 /* ========================= */
 
-.btn,
 .btn-login,
 .btn-register {
     display: inline-flex;
@@ -95,7 +93,6 @@ h1,
     cursor: pointer;
 }
 
-/* Botón login */
 .btn-login {
     background: linear-gradient(135deg, #3b82f6, #60a5fa);
     color: #ffffff;
@@ -109,7 +106,6 @@ h1,
     box-shadow: 0 16px 30px rgba(96, 165, 250, 0.30);
 }
 
-/* Botón register */
 .btn-register {
     background: linear-gradient(135deg, #2563eb, #3b82f6);
     color: #ffffff;
@@ -124,17 +120,17 @@ h1,
 }
 
 /* ========================= */
-/* ===== FORMULARIO LOGIN == */
+/* ===== FORMULARIO ======== */
 /* ========================= */
 
 .login-card form {
     width: 100%;
 }
 
-/* Inputs */
 .login-card input[type="text"],
 .login-card input[type="password"],
-.login-card input[type="email"] {
+.login-card input[type="email"],
+.login-card select {
     width: 100%;
     padding: 12px 15px;
     margin: 10px 0 18px 0;
@@ -153,14 +149,22 @@ h1,
     opacity: 1;
 }
 
-.login-card input:focus {
+.login-card select {
+    appearance: none;
+}
+
+.login-card select option {
+    color: #111827;
+}
+
+.login-card input:focus,
+.login-card select:focus {
     outline: none;
     background: rgba(255, 255, 255, 0.12);
     border-color: #93c5fd;
     box-shadow: 0 0 0 0.2rem rgba(147, 197, 253, 0.22);
 }
 
-/* Botón submit */
 .login-card button {
     width: 100%;
     padding: 12px;
@@ -248,14 +252,11 @@ h1,
 /* ========================= */
 
 @media screen and (max-width: 768px) {
-    .container,
     .login-card {
         padding: 28px 22px;
     }
 
-    h1,
-    .login-card h1,
-    .container h1 {
+    .auth-page .login-card h1 {
         font-size: 1.7rem;
     }
 
@@ -264,7 +265,6 @@ h1,
         align-items: center;
     }
 
-    .btn,
     .btn-login,
     .btn-register {
         width: 100%;
@@ -274,20 +274,18 @@ h1,
 }
 
 @media screen and (max-width: 400px) {
-    .container,
     .login-card {
         padding: 24px 18px;
     }
 
-    h1,
-    .login-card h1,
-    .container h1 {
+    .auth-page .login-card h1 {
         font-size: 1.45rem;
     }
 
     .login-card input[type="text"],
     .login-card input[type="password"],
     .login-card input[type="email"],
+    .login-card select,
     .login-card button {
         font-size: 15px;
     }

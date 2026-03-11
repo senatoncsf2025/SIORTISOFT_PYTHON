@@ -3,9 +3,11 @@
 
 {% block title %}Inicio - SIORTISOFT{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <link href="{% static 'css/style.css' %}" rel="stylesheet">
+{% endblock %}
 
+{% block content %}
 <section id="inicio" class="hero-section text-center position-relative">
     <div class="hero-overlay"></div>
 
@@ -16,9 +18,6 @@
         </p>
 
         <div class="hero-buttons">
-            <a href="{% url 'login' %}" class="btn btn-login btn-lg">
-                🔐 Iniciar sesión
-            </a>
 
             <a href="#" class="btn btn-soluciones btn-lg">
                 🚀 Descubre Nuestras Soluciones

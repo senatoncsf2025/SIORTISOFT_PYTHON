@@ -1,0 +1,72 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Registro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block main_class %}auth-page py-5{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="login-card">
+        <h1>Registro</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="text" name="nombre" placeholder="Nombre" value="{{ nombre|default:'' }}" required>
+            <input type="text" name="apellido" placeholder="Apellido" value="{{ apellido|default:'' }}">
+            <input type="text" name="cedula" placeholder="Cédula" value="{{ cedula|default:'' }}" required>
+            <input type="email" name="email" placeholder="Correo" value="{{ email|default:'' }}" required>
+            <input type="text" name="telefono" placeholder="Teléfono" value="{{ telefono|default:'' }}" required>
+            <input type="text" name="direccion" placeholder="Dirección" value="{{ direccion|default:'' }}" required>
+
+            <select name="tipo_usuario" required>
+                <option value="">Seleccione tipo de usuario</option>
+                <option value="INTERNO" {% if tipo_usuario == 'INTERNO' %}selected{% endif %}>Interno</option>
+                <option value="EXTERNO" {% if tipo_usuario == 'EXTERNO' %}selected{% endif %}>Externo</option>
+            </select>
+
+            <select name="rol" required>
+                <option value="">Seleccione rol</option>
+                <option value="admin" {% if rol == 'admin' %}selected{% endif %}>Admin</option>
+                <option value="vigilante" {% if rol == 'vigilante' %}selected{% endif %}>Vigilante</option>
+                <option value="administrativo" {% if rol == 'administrativo' %}selected{% endif %}>Administrativo</option>
+                <option value="servicios" {% if rol == 'servicios' %}selected{% endif %}>Servicios</option>
+                <option value="personal" {% if rol == 'personal' %}selected{% endif %}>Personal</option>
+            </select>
+
+            <select name="subrol">
+                <option value="">Seleccione subrol</option>
+                <option value="oficinas" {% if subrol == 'oficinas' %}selected{% endif %}>Oficinas</option>
+                <option value="enfermeria" {% if subrol == 'enfermeria' %}selected{% endif %}>Enfermería</option>
+                <option value="vigilantes" {% if subrol == 'vigilantes' %}selected{% endif %}>Vigilantes</option>
+                <option value="parqueadero" {% if subrol == 'parqueadero' %}selected{% endif %}>Parqueadero</option>
+                <option value="visitantes" {% if subrol == 'visitantes' %}selected{% endif %}>Visitantes</option>
+                <option value="acudientes" {% if subrol == 'acudientes' %}selected{% endif %}>Acudientes</option>
+                <option value="docentes" {% if subrol == 'docentes' %}selected{% endif %}>Docentes</option>
+                <option value="estudiantes" {% if subrol == 'estudiantes' %}selected{% endif %}>Estudiantes</option>
+                <option value="personal_general" {% if subrol == 'personal_general' %}selected{% endif %}>Personal General</option>
+            </select>
+
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <input type="password" name="password2" placeholder="Confirmar contraseña" required>
+
+            <button type="submit">Registrarme</button>
+        </form>
+
+        <div class="links">
+            <a href="{% url 'login' %}">Ya tengo cuenta</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
