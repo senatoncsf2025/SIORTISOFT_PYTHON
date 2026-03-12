@@ -12,6 +12,10 @@ urlpatterns = [
     path('acudientes/create/', views.role_create, {'rol': 'acudientes'}, name='acudientes.create'),
     path('acudientes/reporte/', views.role_reporte, {'rol': 'acudientes'}, name='acudientes.reporte'),
 
+    path('docentes/', views.role_index, {'rol': 'docentes'}, name='docentes.index'),
+    path('docentes/create/', views.role_create, {'rol': 'doncentes'}, name='docentes.create'),
+    path('docentes/reporte/', views.role_reporte, {'rol': 'docentes'}, name='docentes.reporte'),
+
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register_view, name='register'),

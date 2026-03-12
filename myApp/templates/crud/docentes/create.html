@@ -1,0 +1,247 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+
+{% block title %}Gestión de {{ rol|title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Gestión de {{ rol|title }}</h1>
+
+
+
+    <a href="{% url 'acudientes_create' %}" class="btn btn-success mb-3">
+        + Nuevo {{ rol_singular|title }}
+    </a>
+
+    <div id="alert-container"></div>
+
+    <button class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#filtroReporteModal">
+        📄 Generar Reporte PDF
+    </button>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Cédula</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Dirección</th>
+                <th>Vehículo</th>
+                <th>PC</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr data-id="{{ usuario.id }}">
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.apellido }}</td>
+                <td>{{ usuario.cedula }}</td>
+                <td>{{ usuario.telefono }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.direccion }}</td>
+                <td>
+                    {% if usuario.vehiculo %}
+                    🚗 {{ usuario.vehiculo.placa }}
+                    ({{ usuario.vehiculo.marca }} {{ usuario.vehiculo.modelo }}, {{ usuario.vehiculo.color }})
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if usuario.pc %}
+                    💻 Serial: {{ usuario.pc.serial }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td class="estado">
+                    {% if usuario.activo %}
+                    <span class="badge bg-success">Activo</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                </td>
+                <td class="acciones">
+                    <a href="{% url 'acudientes_edit' usuario.id %}" class="btn btn-warning btn-sm">Editar</a>
+
+                    {% if usuario.activo %}
+                    <button type="button" class="btn btn-danger btn-sm toggle-estado"
+                        data-url="{% url 'acudientes_inactivar' usuario.id %}" data-action="inactivar">
+                        Inactivar
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-success btn-sm toggle-estado"
+                        data-url="{% url 'acudientes_activar' usuario.id %}" data-action="activar">
+                        Activar
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10">No hay registros</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="filtroReporteModal" tabindex="-1" aria-labelledby="filtroReporteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{% url 'docente_reporte' %}" method="GET" target="_blank">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filtroReporteLabel">Filtros para el reporte</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <label class="form-label">Campos a incluir:</label>
+
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="nombre" checked>
+                        <label class="form-check-label">Nombre</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="apellido" checked>
+                        <label class="form-check-label">Apellido</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="cedula">
+                        <label class="form-check-label">Cédula</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="telefono">
+                        <label class="form-check-label">Teléfono</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="email" checked>
+                        <label class="form-check-label">Email</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="direccion">
+                        <label class="form-check-label">Dirección</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="vehiculo">
+                        <label class="form-check-label">Vehículo</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="pc">
+                        <label class="form-check-label">PC</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="estado">
+                        <label class="form-check-label">Estado</label>
+                    </div>
+
+                    <hr>
+
+                    <label class="form-label">Estado:</label>
+                    <select name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+
+                    <hr>
+
+                    <label class="form-label">Fecha de registro:</label>
+                    <input type="date" name="fecha_inicio" class="form-control mb-2">
+                    <input type="date" name="fecha_fin" class="form-control">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">Generar PDF</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<form id="csrf-form" style="display:none;">
+    {% csrf_token %}
+</form>
+
+<script>
+    function toggleEstadoHandler(event) {
+        const button = event.currentTarget;
+        const url = button.dataset.url;
+        const action = button.dataset.action;
+        const row = button.closest('tr');
+        const estadoCell = row.querySelector('.estado');
+        const accionesCell = row.querySelector('.acciones');
+
+        if (!confirm(`¿Seguro que deseas ${action} este registro?`)) return;
+
+        const csrfTokenInput = document.querySelector('#csrf-form [name=csrfmiddlewaretoken]');
+        const token = csrfTokenInput ? csrfTokenInput.value : '';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': token,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('alert-container').innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+                    if (action === 'inactivar') {
+                        estadoCell.innerHTML = '<span class="badge bg-secondary">Inactivo</span>';
+                        accionesCell.innerHTML = `
+                    <a href="/acudientes/${row.dataset.id}/edit/" class="btn btn-warning btn-sm">Editar</a>
+                    <button type="button" class="btn btn-success btn-sm toggle-estado"
+                        data-url="/acudientes/${row.dataset.id}/activar/"
+                        data-action="activar">Activar</button>
+                `;
+                    } else {
+                        estadoCell.innerHTML = '<span class="badge bg-success">Activo</span>';
+                        accionesCell.innerHTML = `
+                    <a href="/acudientes/${row.dataset.id}/edit/" class="btn btn-warning btn-sm">Editar</a>
+                    <button type="button" class="btn btn-danger btn-sm toggle-estado"
+                        data-url="/acudientes/${row.dataset.id}/inactivar/"
+                        data-action="inactivar">Inactivar</button>
+                `;
+                    }
+
+                    accionesCell.querySelectorAll('.toggle-estado').forEach(btn => {
+                        btn.addEventListener('click', toggleEstadoHandler);
+                    });
+
+                    setTimeout(() => {
+                        const alert = document.querySelector('.alert');
+                        if (alert) {
+                            alert.classList.remove('show');
+                        }
+                    }, 5000);
+                } else {
+                    alert('No se pudo procesar la solicitud');
+                }
+            })
+            .catch(() => alert('Error al procesar la solicitud'));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.toggle-estado').forEach(button => {
+            button.addEventListener('click', toggleEstadoHandler);
+        });
+    });
+</script>
+{% endblock %}

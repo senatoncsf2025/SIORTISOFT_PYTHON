@@ -1,0 +1,153 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Gestión de {{ rol|capfirst }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Gestión de {{ rol|capfirst }}</h1>
+
+    <a href="{% url 'acudientes.create' %}" class="btn btn-success mb-3">
+        + Nuevo {{ rol_singular|capfirst }}
+    </a>
+
+    <div id="alert-container"></div>
+
+    <button class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#filtroReporteModal">
+        📄 Generar Reporte PDF
+    </button>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Cédula</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Dirección</th>
+                <th>Vehículo</th>
+                <th>PC</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.apellido }}</td>
+                <td>{{ usuario.cedula }}</td>
+                <td>{{ usuario.telefono }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.direccion }}</td>
+                <td>
+                    {% if usuario.vehiculo %}
+                        🚗 {{ usuario.vehiculo.placa }}
+                        ({{ usuario.vehiculo.marca }} {{ usuario.vehiculo.modelo }}, {{ usuario.vehiculo.color }})
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if usuario.pc %}
+                        💻 Serial: {{ usuario.pc.serial }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if usuario.activo %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" disabled>Editar</button>
+                    <button class="btn btn-secondary btn-sm" disabled>Estado</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="text-center">No hay registros</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="filtroReporteModal" tabindex="-1" aria-labelledby="filtroReporteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{% url 'acudientes.reporte' %}" method="GET" target="_blank">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filtroReporteLabel">Filtros para el reporte</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <label class="form-label">Campos a incluir:</label>
+
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="nombre" checked>
+                        <label class="form-check-label">Nombre</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="apellido" checked>
+                        <label class="form-check-label">Apellido</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="cedula">
+                        <label class="form-check-label">Cédula</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="telefono">
+                        <label class="form-check-label">Teléfono</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="email" checked>
+                        <label class="form-check-label">Email</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="direccion">
+                        <label class="form-check-label">Dirección</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="vehiculo">
+                        <label class="form-check-label">Vehículo</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="pc">
+                        <label class="form-check-label">PC</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="campos" value="estado">
+                        <label class="form-check-label">Estado</label>
+                    </div>
+
+                    <hr>
+
+                    <label class="form-label">Estado:</label>
+                    <select name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+
+                    <hr>
+
+                    <label class="form-label">Fecha de registro:</label>
+                    <input type="date" name="fecha_inicio" class="form-control mb-2">
+                    <input type="date" name="fecha_fin" class="form-control">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">Generar PDF</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
