@@ -1,0 +1,22 @@
+{% extends 'layouts/app.html' %}
+{% load static %}
+
+{% block title %}Sección Vigilantes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">Módulo de Vigilantes</h2>
+
+    <div class="text-center mb-4">
+        <button class="btn btn-primary mx-2" id="btnConsulta">Consulta</button>
+        <button class="btn btn-success mx-2" id="btnRegistro">Registro Vigilante</button>
+    </div>
+
+    {% include 'secciones/partials/consulta.html' with rol='vigilantes' %}
+    {% include 'secciones/partials/registro.html' with rol='vigilantes' %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/toggle_forms.js' %}"></script>
+{% endblock %}

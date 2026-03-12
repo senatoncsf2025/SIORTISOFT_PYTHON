@@ -1,0 +1,22 @@
+{% extends 'layouts/app.html' %}
+{% load static %}
+
+{% block title %}Sección Acudientes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">Módulo de Acudientes</h2>
+
+    <div class="text-center mb-4">
+        <button class="btn btn-primary mx-2" id="btnConsulta">Consulta</button>
+        <button class="btn btn-success mx-2" id="btnRegistro">Registro Acudiente</button>
+    </div>
+
+    {% include 'secciones/partials/consulta.html' with rol='acudientes' %}
+    {% include 'secciones/partials/registro.html' with rol='acudientes' %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/toggle_forms.js' %}"></script>
+{% endblock %}

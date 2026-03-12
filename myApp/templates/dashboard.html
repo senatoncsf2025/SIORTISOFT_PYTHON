@@ -1,0 +1,45 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Dashboard del Administrador</h1>
+
+    <div class="alert alert-success">
+        Bienvenido, {{ request.user.nombre }}. Tienes acceso como administrador.
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Gestión de usuarios</h5>
+                    <p class="card-text">Administra usuarios, roles y accesos.</p>
+                    <a href="#" class="btn btn-primary">Entrar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Reportes</h5>
+                    <p class="card-text">Consulta reportes generales del sistema.</p>
+                    <a href="#" class="btn btn-primary">Ver reportes</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Configuración</h5>
+                    <p class="card-text">Configura parámetros globales del sistema.</p>
+                    <a href="#" class="btn btn-primary">Configurar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
