@@ -9,11 +9,14 @@ from django.contrib.auth.models import (
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, nombre, password=None, **extra_fields):
         if not email:
-            raise ValueError("El email es obligatorio")
+            raise ValueError("El email es obligatorio para usuarios del sistema")
 
         email = self.normalize_email(email)
         user = self.model(email=email, nombre=nombre, **extra_fields)
         user.set_password(password)
+
+        # Si no se define rol, por defecto será admin/vigilante según quien lo cree manualmente.
+        # Para usuarios del sistema el email sí es obligatorio.
         user.save(using=self._db)
         return user
 
@@ -28,6 +31,9 @@ class UsuarioManager(BaseUserManager):
 
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("El superusuario debe tener is_superuser=True")
+
+        if extra_fields.get("rol") != "admin":
+            raise ValueError("El superusuario debe tener rol='admin'")
 
         return self.create_user(email, nombre, password, **extra_fields)
 
@@ -49,24 +55,23 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         ("PM", "PM"),
     ]
 
+    # Solo estos roles inician sesión en el sistema
     ROLES = [
-        ("admin", "Admin"),
+        ("admin", "Administrador"),
         ("vigilante", "Vigilante"),
-        ("administrativo", "Administrativo"),
-        ("servicios", "Servicios"),
-        ("personal", "Personal"),
+        ("persona", "Persona Registrada"),
     ]
 
+    # Clasificación funcional de las personas registradas
     SUBROLES = [
         ("oficinas", "Oficinas"),
         ("enfermeria", "Enfermería"),
-        ("vigilantes", "Vigilantes"),
         ("parqueadero", "Parqueadero"),
         ("visitantes", "Visitantes"),
         ("acudientes", "Acudientes"),
         ("docentes", "Docentes"),
         ("estudiantes", "Estudiantes"),
-        ("personal_general", "Personal General"),
+        ("personal", "Personal"),
     ]
 
     nombre = models.CharField(max_length=255)
@@ -76,6 +81,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     genero = models.CharField(max_length=10, choices=GENERO, blank=True, null=True)
     fecha_nacimiento = models.DateField(blank=True, null=True)
 
+    # Solo admin y vigilante necesitan email para login.
+    # Para personas registradas puede ir vacío.
     email = models.EmailField(unique=True, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)
@@ -101,7 +108,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         related_name="usuarios_registrados",
     )
 
-    rol = models.CharField(max_length=20, choices=ROLES, default="personal")
+    rol = models.CharField(max_length=20, choices=ROLES, default="persona")
     subrol = models.CharField(max_length=30, choices=SUBROLES, blank=True, null=True)
 
     activo = models.BooleanField(default=True)
@@ -127,7 +134,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.nombre} {self.apellido or ''} - {self.subrol or self.rol}"
+        etiqueta = self.subrol if self.rol == "persona" else self.rol
+        return f"{self.nombre_completo} - {etiqueta}"
 
     @property
     def is_active(self):
@@ -136,6 +144,27 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     @property
     def nombre_completo(self):
         return f"{self.nombre} {self.apellido or ''}".strip()
+
+    @property
+    def puede_iniciar_sesion(self):
+        return self.rol in ["admin", "vigilante"]
+
+    def save(self, *args, **kwargs):
+        # Normaliza reglas de acceso:
+        # solo admin y vigilante pueden entrar al sistema
+        if self.rol in ["admin", "vigilante"]:
+            self.is_staff = True
+        else:
+            self.is_staff = False
+            self.is_superuser = False
+
+        # Si es una persona registrada normal, debe tener subrol
+        if self.rol == "persona" and not self.subrol:
+            # No lanzamos error aquí para no romper cargas parciales;
+            # esto idealmente se valida en forms/serializers/admin.
+            pass
+
+        super().save(*args, **kwargs)
 
 
 class Vehiculo(models.Model):
@@ -193,6 +222,7 @@ class Movimiento(models.Model):
     tipo = models.CharField(max_length=10, choices=TIPO_MOVIMIENTO)
     observaciones = models.TextField(blank=True, null=True)
 
+    # normalmente lo registra un vigilante o admin
     registrado_por = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
@@ -210,22 +240,3 @@ class Movimiento(models.Model):
 
     def __str__(self):
         return f"{self.usuario.nombre_completo} - {self.tipo} - {self.fecha:%Y-%m-%d %H:%M}"
-
-
-class Registro(models.Model):
-    usuario = models.ForeignKey(
-        Usuario,
-        on_delete=models.CASCADE,
-        related_name="registros",
-    )
-    fecha_entrada = models.DateTimeField(auto_now_add=True)
-    fecha_salida = models.DateTimeField(blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True)
-
-    class Meta:
-        verbose_name = "Registro"
-        verbose_name_plural = "Registros"
-        ordering = ["-fecha_entrada"]
-
-    def __str__(self):
-        return f"{self.usuario.nombre_completo} - Entrada: {self.fecha_entrada:%Y-%m-%d %H:%M}"

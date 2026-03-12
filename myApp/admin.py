@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Usuario, Registro
+from .models import Usuario, Vehiculo, Computador, Movimiento
 
 
 @admin.register(Usuario)
@@ -112,8 +112,43 @@ class UsuarioAdmin(UserAdmin):
     )
 
 
-@admin.register(Registro)
-class RegistroAdmin(admin.ModelAdmin):
-    list_display = ("usuario", "fecha_entrada", "fecha_salida")
-    search_fields = ("usuario__nombre", "usuario__email", "usuario__cedula")
-    list_filter = ("fecha_entrada", "fecha_salida")
+@admin.register(Vehiculo)
+class VehiculoAdmin(admin.ModelAdmin):
+    list_display = ("usuario", "placa", "marca", "modelo", "color", "created_at")
+    search_fields = (
+        "usuario__nombre",
+        "usuario__apellido",
+        "usuario__cedula",
+        "placa",
+        "marca",
+        "modelo",
+        "color",
+    )
+    list_filter = ("marca", "modelo", "color", "created_at")
+
+
+@admin.register(Computador)
+class ComputadorAdmin(admin.ModelAdmin):
+    list_display = ("usuario", "serial", "created_at")
+    search_fields = (
+        "usuario__nombre",
+        "usuario__apellido",
+        "usuario__cedula",
+        "serial",
+    )
+    list_filter = ("created_at",)
+
+
+@admin.register(Movimiento)
+class MovimientoAdmin(admin.ModelAdmin):
+    list_display = ("usuario", "tipo", "registrado_por", "fecha")
+    search_fields = (
+        "usuario__nombre",
+        "usuario__apellido",
+        "usuario__cedula",
+        "usuario__email",
+        "registrado_por__nombre",
+        "registrado_por__email",
+        "observaciones",
+    )
+    list_filter = ("tipo", "fecha", "registrado_por")

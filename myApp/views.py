@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -16,45 +16,12 @@ def index2(request):
     return render(request, "index2.html")
 
 
-@login_required
-def role_index(request, rol):
-    usuarios = []
-
-    context = {
-        "rol": rol,
-        "rol_singular": "acudiente" if rol == "acudientes" else rol,
-        "usuarios": usuarios,
-        "create_url_name": f"{rol}.create",
-        "edit_url_name": f"{rol}.edit",
-        "activar_url_name": f"{rol}.activar",
-        "inactivar_url_name": f"{rol}.inactivar",
-        "reporte_url_name": f"{rol}.reporte",
-        "edit_base_url": f"/dashboard/{rol}/",
-        "activar_base_url": f"/dashboard/{rol}/activar/",
-        "inactivar_base_url": f"/dashboard/{rol}/inactivar/",
-    }
-    return render(request, f"crud/{rol}/index.html", context)
-
-
-@login_required
-def role_create(request, rol):
-    context = {
-        "rol": rol,
-        "rol_singular": "acudiente" if rol == "acudientes" else rol,
-        "action_url": f"/dashboard/{rol}/store/",
-        "cancel_url": f"/dashboard/{rol}/",
-        "form": {},
-    }
-    return render(request, f"crud/{rol}/create.html", context)
-
-
-@login_required
-def role_reporte(request, rol):
-    return HttpResponse(f"Reporte de {rol}")
-
-
 def redirigir_por_rol(user):
-    return redirect("index2")
+    if user.rol == "admin":
+        return redirect("index2")
+    elif user.rol == "vigilante":
+        return redirect("dashboard")
+    return redirect("home")
 
 
 def login_view(request):
@@ -77,6 +44,8 @@ def login_view(request):
         else:
             messages.error(request, "Correo o contraseña incorrectos")
 
+        return render(request, "auth/login.html", {"email": email})
+
     return render(request, "auth/login.html")
 
 
@@ -87,6 +56,12 @@ def logout_view(request):
 
 
 def register_view(request):
+    # Registro SOLO de usuarios del sistema
+    # admin y vigilante
+
+    if request.user.is_authenticated:
+        return redirigir_por_rol(request.user)
+
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
         apellido = request.POST.get("apellido", "").strip()
@@ -96,7 +71,6 @@ def register_view(request):
         direccion = request.POST.get("direccion", "").strip()
         tipo_usuario = request.POST.get("tipo_usuario", "").strip()
         rol = request.POST.get("rol", "").strip()
-        subrol = request.POST.get("subrol", "").strip()
         password = request.POST.get("password", "").strip()
         password2 = request.POST.get("password2", "").strip()
 
@@ -109,7 +83,6 @@ def register_view(request):
             "direccion": direccion,
             "tipo_usuario": tipo_usuario,
             "rol": rol,
-            "subrol": subrol,
         }
 
         if not nombre:
@@ -124,20 +97,16 @@ def register_view(request):
             messages.error(request, "El correo es obligatorio")
             return render(request, "auth/register.html", context)
 
-        if not telefono:
-            messages.error(request, "El teléfono es obligatorio")
-            return render(request, "auth/register.html", context)
-
-        if not direccion:
-            messages.error(request, "La dirección es obligatoria")
-            return render(request, "auth/register.html", context)
-
         if not tipo_usuario:
             messages.error(request, "Debes seleccionar el tipo de usuario")
             return render(request, "auth/register.html", context)
 
-        if not rol:
-            messages.error(request, "Debes seleccionar el rol")
+        if rol not in ["admin", "vigilante"]:
+            messages.error(request, "Solo puedes registrar administradores o vigilantes")
+            return render(request, "auth/register.html", context)
+
+        if not password or not password2:
+            messages.error(request, "Debes ingresar y confirmar la contraseña")
             return render(request, "auth/register.html", context)
 
         if password != password2:
@@ -145,7 +114,7 @@ def register_view(request):
             return render(request, "auth/register.html", context)
 
         if Usuario.objects.filter(email=email).exists():
-            messages.error(request, "El email ya está registrado")
+            messages.error(request, "El correo ya está registrado")
             return render(request, "auth/register.html", context)
 
         if Usuario.objects.filter(cedula=cedula).exists():
@@ -155,19 +124,144 @@ def register_view(request):
         Usuario.objects.create_user(
             email=email,
             nombre=nombre,
-            apellido=apellido,
+            apellido=apellido or None,
             cedula=cedula,
-            telefono=telefono,
-            direccion=direccion,
+            telefono=telefono or None,
+            direccion=direccion or None,
             tipo_usuario=tipo_usuario,
             rol=rol,
-            subrol=subrol if subrol else None,
             password=password,
+            activo=True,
+            is_staff=True,
         )
 
-        messages.success(
-            request, "Usuario creado correctamente. Ya puedes iniciar sesión"
-        )
+        messages.success(request, "Usuario creado correctamente. Ya puedes iniciar sesión")
         return redirect("login")
 
     return render(request, "auth/register.html")
+
+
+# =========================
+# VISTAS DEL VIGILANTE
+# =========================
+
+@login_required
+def dashboard_view(request):
+    if request.user.rol != "vigilante":
+        messages.error(request, "No tienes acceso al dashboard de vigilante")
+        return redirigir_por_rol(request.user)
+
+    return render(request, "dashboard.html")
+
+
+@login_required
+def seccion_view(request, rol):
+    if request.user.rol != "vigilante":
+        messages.error(request, "No tienes acceso a esta sección")
+        return redirigir_por_rol(request.user)
+
+    roles_validos = [
+        "acudientes",
+        "docentes",
+        "estudiantes",
+        "enfermeria",
+        "oficinas",
+        "parqueadero",
+        "personal",
+        "visitantes",
+        "vigilantes",
+    ]
+
+    if rol not in roles_validos:
+        messages.error(request, "La sección solicitada no existe")
+        return redirect("dashboard")
+
+    singular_map = {
+        "acudientes": "acudiente",
+        "docentes": "docente",
+        "estudiantes": "estudiante",
+        "enfermeria": "enfermería",
+        "oficinas": "oficina",
+        "parqueadero": "parqueadero",
+        "personal": "personal",
+        "visitantes": "visitante",
+        "vigilantes": "vigilante",
+    }
+
+    context = {
+        "rol": rol,
+        "rol_singular": singular_map.get(rol, rol),
+    }
+
+    return render(request, f"secciones/{rol}.html", context)
+
+
+# =========================
+# VISTAS DEL ADMIN
+# =========================
+
+@login_required
+def role_index(request, rol):
+    if request.user.rol != "admin":
+        messages.error(request, "No tienes acceso al CRUD administrativo")
+        return redirigir_por_rol(request.user)
+
+    usuarios = Usuario.objects.filter(subrol=rol).order_by("-created_at")
+
+    context = {
+        "rol": rol,
+        "rol_singular": "acudiente" if rol == "acudientes" else rol,
+        "usuarios": usuarios,
+        "create_url_name": f"{rol}.create",
+        "edit_url_name": f"{rol}.edit",
+        "activar_url_name": f"{rol}.activar",
+        "inactivar_url_name": f"{rol}.inactivar",
+        "reporte_url_name": f"{rol}.reporte",
+        "edit_base_url": f"/dashboard/{rol}/",
+        "activar_base_url": f"/dashboard/{rol}/activar/",
+        "inactivar_base_url": f"/dashboard/{rol}/inactivar/",
+    }
+    return render(request, f"crud/{rol}/index.html", context)
+
+
+@login_required
+def role_create(request, rol):
+    if request.user.rol != "admin":
+        messages.error(request, "No tienes acceso al CRUD administrativo")
+        return redirigir_por_rol(request.user)
+
+    context = {
+        "rol": rol,
+        "rol_singular": "acudiente" if rol == "acudientes" else rol,
+        "action_url": f"/crud/{rol}/store/",
+        "cancel_url": f"/crud/{rol}/",
+        "form": {},
+    }
+    return render(request, f"crud/{rol}/create.html", context)
+
+
+@login_required
+def role_edit(request, rol, user_id):
+    if request.user.rol != "admin":
+        messages.error(request, "No tienes acceso al CRUD administrativo")
+        return redirigir_por_rol(request.user)
+
+    usuario = get_object_or_404(Usuario, id=user_id, subrol=rol)
+
+    context = {
+        "rol": rol,
+        "rol_singular": "acudiente" if rol == "acudientes" else rol,
+        "usuario": usuario,
+        "action_url": f"/crud/{rol}/{user_id}/update/",
+        "cancel_url": f"/crud/{rol}/",
+    }
+    return render(request, f"crud/{rol}/edit.html", context)
+
+
+@login_required
+def role_reporte(request, rol):
+    if request.user.rol != "admin":
+        messages.error(request, "No tienes acceso a reportes")
+        return redirigir_por_rol(request.user)
+
+    return render(request, f"crud/{rol}/reporte.html", {"rol": rol})
