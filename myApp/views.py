@@ -13,6 +13,10 @@ def index(request):
 
 @login_required
 def index2(request):
+    if request.user.rol != "admin":
+        messages.error(request, "No tienes acceso al panel de administrador")
+        return redirigir_por_rol(request.user)
+
     return render(request, "index2.html")
 
 
@@ -56,7 +60,7 @@ def logout_view(request):
 
 
 def register_view(request):
-    # Registro SOLO de usuarios del sistema
+    # Registro SOLO de usuarios del sistema:
     # admin y vigilante
 
     if request.user.is_authenticated:
@@ -142,13 +146,13 @@ def register_view(request):
 
 
 # =========================
-# VISTAS DEL VIGILANTE
+# VISTAS DEL PANEL VIGILANTE
 # =========================
 
 @login_required
 def dashboard_view(request):
-    if request.user.rol != "vigilante":
-        messages.error(request, "No tienes acceso al dashboard de vigilante")
+    if request.user.rol not in ["admin", "vigilante"]:
+        messages.error(request, "No tienes acceso al dashboard")
         return redirigir_por_rol(request.user)
 
     return render(request, "dashboard.html")
@@ -156,7 +160,7 @@ def dashboard_view(request):
 
 @login_required
 def seccion_view(request, rol):
-    if request.user.rol != "vigilante":
+    if request.user.rol not in ["admin", "vigilante"]:
         messages.error(request, "No tienes acceso a esta sección")
         return redirigir_por_rol(request.user)
 
@@ -208,18 +212,30 @@ def role_index(request, rol):
 
     usuarios = Usuario.objects.filter(subrol=rol).order_by("-created_at")
 
+    singular_map = {
+        "acudientes": "acudiente",
+        "docentes": "docente",
+        "estudiantes": "estudiante",
+        "enfermeria": "enfermería",
+        "oficinas": "oficina",
+        "parqueadero": "parqueadero",
+        "personal": "personal",
+        "visitantes": "visitante",
+        "vigilantes": "vigilante",
+    }
+
     context = {
         "rol": rol,
-        "rol_singular": "acudiente" if rol == "acudientes" else rol,
+        "rol_singular": singular_map.get(rol, rol),
         "usuarios": usuarios,
         "create_url_name": f"{rol}.create",
         "edit_url_name": f"{rol}.edit",
         "activar_url_name": f"{rol}.activar",
         "inactivar_url_name": f"{rol}.inactivar",
         "reporte_url_name": f"{rol}.reporte",
-        "edit_base_url": f"/dashboard/{rol}/",
-        "activar_base_url": f"/dashboard/{rol}/activar/",
-        "inactivar_base_url": f"/dashboard/{rol}/inactivar/",
+        "edit_base_url": f"/crud/{rol}/",
+        "activar_base_url": f"/crud/{rol}/activar/",
+        "inactivar_base_url": f"/crud/{rol}/inactivar/",
     }
     return render(request, f"crud/{rol}/index.html", context)
 
@@ -230,9 +246,21 @@ def role_create(request, rol):
         messages.error(request, "No tienes acceso al CRUD administrativo")
         return redirigir_por_rol(request.user)
 
+    singular_map = {
+        "acudientes": "acudiente",
+        "docentes": "docente",
+        "estudiantes": "estudiante",
+        "enfermeria": "enfermería",
+        "oficinas": "oficina",
+        "parqueadero": "parqueadero",
+        "personal": "personal",
+        "visitantes": "visitante",
+        "vigilantes": "vigilante",
+    }
+
     context = {
         "rol": rol,
-        "rol_singular": "acudiente" if rol == "acudientes" else rol,
+        "rol_singular": singular_map.get(rol, rol),
         "action_url": f"/crud/{rol}/store/",
         "cancel_url": f"/crud/{rol}/",
         "form": {},
@@ -248,9 +276,21 @@ def role_edit(request, rol, user_id):
 
     usuario = get_object_or_404(Usuario, id=user_id, subrol=rol)
 
+    singular_map = {
+        "acudientes": "acudiente",
+        "docentes": "docente",
+        "estudiantes": "estudiante",
+        "enfermeria": "enfermería",
+        "oficinas": "oficina",
+        "parqueadero": "parqueadero",
+        "personal": "personal",
+        "visitantes": "visitante",
+        "vigilantes": "vigilante",
+    }
+
     context = {
         "rol": rol,
-        "rol_singular": "acudiente" if rol == "acudientes" else rol,
+        "rol_singular": singular_map.get(rol, rol),
         "usuario": usuario,
         "action_url": f"/crud/{rol}/{user_id}/update/",
         "cancel_url": f"/crud/{rol}/",
