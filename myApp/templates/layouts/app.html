@@ -21,7 +21,7 @@
             {% if request.user.is_authenticated %}
                 {% if request.user.rol == 'admin' %}
                     <a class="navbar-brand fw-bold" href="{% url 'index2' %}">
-                        SIORTISOFT
+                       
                     </a>
                 {% elif request.user.rol == 'vigilante' %}
                     <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">

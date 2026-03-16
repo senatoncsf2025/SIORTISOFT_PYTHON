@@ -1,125 +1,187 @@
 {% extends "layouts/app.html" %}
 {% load static %}
 
-{% block title %}Panel Principal - SIORTISOFT{% endblock %}
+{% block title %}Dashboard - SIORTISOFT{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
 {% endblock %}
 
 {% block content %}
-<div style="padding-top: 1%;"></div>
 
-<div class="login-register mt-5 text-center">
-    {% if request.user.is_authenticated %}
-    {% else %}
+<div class="dashboard-container">
 
-    <div class="button-group mt-3">
-        <a href="{% url 'login' %}" class="btn btn-login">Iniciar Sesión</a>
-        <a href="{% url 'register' %}" class="btn btn-register">Registrarse</a>
-    </div>
-    {% endif %}
-</div>
-<div class="container my-4">
-    <h1 class="text-center mb-4">Panel Principal</h1>
+<!-- SIDEBAR -->
+<div class="sidebar">
 
-    <h2 class="text-center mb-4">Usuarios</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <a href="#" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardUsuarios">
-                    <div class="card-body">
-                        <h5 class="card-title">Modulo Personal</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="#" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardEstudiantes">
-                    <div class="card-body">
-                        <h5 class="card-title">Modulo Estudiantes</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="{% url 'docentes.index' %}" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardDocentes">
-                    <div class="card-body">
-                        <h5 class="card-title">Docentes</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+<h4>SIORTISOFT</h4>
 
-    <h2 class="text-center mt-5 mb-4">Administrativos</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <a href="#" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardOficinas">
-                    <div class="card-body">
-                        <h5 class="card-title">Oficinas</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="#" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardVigilantes">
-                    <div class="card-body">
-                        <h5 class="card-title">Vigilantes</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="#" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardEnfermeria">
-                    <div class="card-body">
-                        <h5 class="card-title">Enfermería</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+<a href="{% url 'index2' %}">Panel Principal</a>
+<a href="{% url 'personal.index' %}">Personal</a>
+<a href="{% url 'estudiantes.index' %}">Estudiantes</a>
+<a href="{% url 'docentes.index' %}">Docentes</a>
+<a href="{% url 'oficinas.index' %}">Oficinas</a>
+<a href="{% url 'vigilantes.index' %}">Vigilantes</a>
+<a href="{% url 'enfermeria.index' %}">Enfermería</a>
+<a href="{% url 'parqueadero.index' %}">Parqueadero</a>
+<a href="{% url 'visitantes.index' %}">Visitantes</a>
+<a href="{% url 'acudientes.index' %}">Acudientes</a>
 
-    <h2 class="text-center mt-5 mb-4">Servicios</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <a href="#" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardParqueadero">
-                    <div class="card-body">
-                        <h5 class="card-title">Parqueadero</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="#" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardVisitantes">
-                    <div class="card-body">
-                        <h5 class="card-title">Visitantes</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="{% url 'acudientes.index' %}" class="text-decoration-none text-dark">
-                <div class="card dashboard-card text-center" id="cardAcudientes">
-                    <div class="card-body">
-                        <h5 class="card-title">Acudientes</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+<div class="user-box">
 
+<p>{{ request.user.nombre }}</p>
+
+<a href="{% url 'logout' %}">
+Cerrar sesión
+</a>
 
 </div>
+
+</div>
+
+<!-- CONTENIDO -->
+<div class="main-panel">
+
+<h1>Panel de Control</h1>
+
+<div class="stats-grid">
+
+<div class="stat-card">
+<div class="stat-number" id="usuarios">0</div>
+<div class="stat-title">Usuarios</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-number" id="estudiantes">0</div>
+<div class="stat-title">Estudiantes</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-number" id="docentes">0</div>
+<div class="stat-title">Docentes</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-number" id="visitantes">0</div>
+<div class="stat-title">Visitantes Hoy</div>
+</div>
+
+</div>
+
+
+<div class="table-container">
+
+<h3>Docentes</h3>
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Apellido</th>
+<th>Cargo</th>
+<th>Tipo</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% if docentes %}
+{% for docente in docentes %}
+
+<tr>
+<td>{{ docente.nombre }}</td>
+<td>{{ docente.apellido }}</td>
+<td>{{ docente.cargo }}</td>
+<td>Docente</td>
+</tr>
+
+{% endfor %}
+{% else %}
+
+<tr>
+<td colspan="4">No hay docentes registrados</td>
+</tr>
+
+{% endif %}
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<div class="table-container">
+
+<h3>Estudiantes</h3>
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Apellido</th>
+<th>Tipo Usuario</th>
+<th>Tipo</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% if estudiantes %}
+{% for estudiante in estudiantes %}
+
+<tr>
+<td>{{ estudiante.nombre }}</td>
+<td>{{ estudiante.apellido }}</td>
+<td>{{ estudiante.tipo_usuario }}</td>
+<td>Estudiante</td>
+</tr>
+
+{% endfor %}
+{% else %}
+
+<tr>
+<td colspan="4">No hay estudiantes registrados</td>
+</tr>
+
+{% endif %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'js/dashboard.js' %}"></script>
+
+<script>
+
+function actualizarDashboard(){
+
+fetch("/dashboard-data/")
+.then(res => res.json())
+.then(data => {
+
+document.getElementById("usuarios").innerText = data.usuarios
+document.getElementById("estudiantes").innerText = data.estudiantes
+document.getElementById("docentes").innerText = data.docentes
+document.getElementById("visitantes").innerText = data.visitantes
+
+})
+
+}
+
+setInterval(actualizarDashboard,3000)
+
+actualizarDashboard()
+
+</script>
+
 {% endblock %}
