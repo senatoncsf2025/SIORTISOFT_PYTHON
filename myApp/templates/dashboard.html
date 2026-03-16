@@ -1,45 +1,128 @@
 {% extends "layouts/app.html" %}
+{% load static %}
 
-{% block title %}Dashboard Admin{% endblock %}
+{% block title %}Panel Vigilante - SIORTISOFT{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4">Dashboard del Administrador</h1>
+<div style="padding-top: 1%;"></div>
 
-    <div class="alert alert-success">
-        Bienvenido, {{ request.user.nombre }}. Tienes acceso como administrador.
+<div class="login-register mt-5 text-center">
+    {% if not request.user.is_authenticated %}
+    <div class="button-group mt-3">
+        <a href="{% url 'login' %}" class="btn btn-login">Iniciar Sesión</a>
+        <a href="{% url 'register' %}" class="btn btn-register">Registrarse</a>
     </div>
+    {% endif %}
+</div>
 
+<div class="container my-4">
+    <h1 class="text-center mb-4">Panel del Vigilante</h1>
+
+    <h2 class="text-center mb-4">Usuarios</h2>
     <div class="row g-4">
         <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Gestión de usuarios</h5>
-                    <p class="card-text">Administra usuarios, roles y accesos.</p>
-                    <a href="#" class="btn btn-primary">Entrar</a>
+            <a href="{% url 'secciones.personal' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardUsuarios">
+                    <div class="card-body">
+                        <h5 class="card-title">Módulo Personal</h5>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Reportes</h5>
-                    <p class="card-text">Consulta reportes generales del sistema.</p>
-                    <a href="#" class="btn btn-primary">Ver reportes</a>
+            <a href="{% url 'secciones.estudiantes' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardEstudiantes">
+                    <div class="card-body">
+                        <h5 class="card-title">Módulo Estudiantes</h5>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Configuración</h5>
-                    <p class="card-text">Configura parámetros globales del sistema.</p>
-                    <a href="#" class="btn btn-primary">Configurar</a>
+            <a href="{% url 'secciones.docentes' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardDocentes">
+                    <div class="card-body">
+                        <h5 class="card-title">Módulo Docentes</h5>
+                    </div>
                 </div>
-            </div>
+            </a>
+        </div>
+    </div>
+
+    <h2 class="text-center mt-5 mb-4">Administrativos</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <a href="{% url 'secciones.oficinas' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardOficinas">
+                    <div class="card-body">
+                        <h5 class="card-title">Oficinas</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'secciones.vigilantes' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardVigilantes">
+                    <div class="card-body">
+                        <h5 class="card-title">Vigilantes</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'secciones.enfermeria' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardEnfermeria">
+                    <div class="card-body">
+                        <h5 class="card-title">Enfermería</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <h2 class="text-center mt-5 mb-4">Servicios</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <a href="{% url 'secciones.parqueadero' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardParqueadero">
+                    <div class="card-body">
+                        <h5 class="card-title">Parqueadero</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'secciones.visitantes' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardVisitantes">
+                    <div class="card-body">
+                        <h5 class="card-title">Visitantes</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'secciones.acudientes' %}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card text-center" id="cardAcudientes">
+                    <div class="card-body">
+                        <h5 class="card-title">Acudientes</h5>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}
