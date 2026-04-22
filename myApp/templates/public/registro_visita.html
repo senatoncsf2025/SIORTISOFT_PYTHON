@@ -1,0 +1,141 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Registro de Visita - SIORTISOFT{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/style.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center flex-column py-5">
+    <form class="login-form text-center bg-white p-4 shadow rounded w-100"
+          method="POST"
+          action="{% url 'registro_visita' %}">
+        {% csrf_token %}
+        <h2>REGISTRO DE VISITA</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} text-start">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <input type="hidden" name="rol_externo" value="visitante">
+
+        <div class="mb-3 text-start">
+            <label for="nombre" class="form-label">Nombre Completo</label>
+            <input type="text" name="nombre" id="nombre" class="form-control"
+                   value="{{ nombre|default:'' }}" required>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input type="text" name="telefono" id="telefono" class="form-control"
+                   value="{{ telefono|default:'' }}">
+        </div>
+
+        <div class="mb-3 text-start">
+            <label for="cedula" class="form-label">Cédula</label>
+            <input type="text" name="cedula" id="cedula" class="form-control"
+                   value="{{ cedula|default:'' }}" required>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label" for="traeVehiculo">¿Trae vehículo?</label>
+            <select name="trae_vehiculo" id="traeVehiculo" class="form-control">
+                <option value="0" {% if trae_vehiculo == "0" or not trae_vehiculo %}selected{% endif %}>No</option>
+                <option value="1" {% if trae_vehiculo == "1" %}selected{% endif %}>Sí</option>
+            </select>
+        </div>
+
+        <div id="formVehiculo" style="display: none;">
+            <h5 class="text-success mt-4 mb-3">Datos del vehículo</h5>
+
+            <div class="mb-3 text-start">
+                <label for="placa" class="form-label">Placa</label>
+                <input type="text" name="placa" id="placa" class="form-control"
+                       value="{{ placa|default:'' }}">
+            </div>
+
+            <div class="mb-3 text-start">
+                <label for="marca" class="form-label">Marca</label>
+                <input type="text" name="marca" id="marca" class="form-control"
+                       value="{{ marca|default:'' }}">
+            </div>
+
+            <div class="mb-3 text-start">
+                <label for="modelo" class="form-label">Modelo</label>
+                <input type="text" name="modelo" id="modelo" class="form-control"
+                       value="{{ modelo|default:'' }}">
+            </div>
+
+            <div class="mb-3 text-start">
+                <label for="color" class="form-label">Color</label>
+                <input type="text" name="color" id="color" class="form-control"
+                       value="{{ color|default:'' }}">
+            </div>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label" for="traePC">¿Trae PC?</label>
+            <select name="trae_pc" id="traePC" class="form-control">
+                <option value="0" {% if trae_pc == "0" or not trae_pc %}selected{% endif %}>No</option>
+                <option value="1" {% if trae_pc == "1" %}selected{% endif %}>Sí</option>
+            </select>
+        </div>
+
+        <div id="formPC" style="display: none;">
+            <div class="mb-3 text-start">
+                <label for="serial_pc" class="form-label">Últimos 4 caracteres del serial del PC</label>
+                <input type="text" name="serial_pc" id="serial_pc" class="form-control" maxlength="4"
+                       value="{{ serial_pc|default:'' }}">
+            </div>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label for="fecha_visita" class="form-label">Día de visita</label>
+            <input type="date" name="fecha_visita" id="fecha_visita" class="form-control"
+                   value="{{ fecha_visita|default:'' }}" required>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label for="horario" class="form-label">Horario</label>
+            <select name="horario" id="horario" class="form-control" required>
+                <option value="">Selecciona un horario</option>
+                <option value="AM" {% if horario == "AM" %}selected{% endif %}>00:00 AM - 12:00 PM</option>
+                <option value="PM" {% if horario == "PM" %}selected{% endif %}>12:01 PM - 11:59 PM</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100">Registrar Visita</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const traeVehiculo = document.getElementById('traeVehiculo');
+    const traePC = document.getElementById('traePC');
+    const formVehiculo = document.getElementById('formVehiculo');
+    const formPC = document.getElementById('formPC');
+
+    function toggleVehiculo() {
+        formVehiculo.style.display = traeVehiculo.value === '1' ? 'block' : 'none';
+    }
+
+    function togglePC() {
+        formPC.style.display = traePC.value === '1' ? 'block' : 'none';
+    }
+
+    traeVehiculo.addEventListener('change', toggleVehiculo);
+    traePC.addEventListener('change', togglePC);
+
+    toggleVehiculo();
+    togglePC(); 
+});
+</script>
+{% endblock %}

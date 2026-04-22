@@ -1,0 +1,301 @@
+/* ========================= */
+/* ===== RESET BÁSICO ====== */
+/* ========================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+/* ========================= */
+/* ===== AUTH PAGE ========= */
+/* ========================= */
+
+.auth-page{
+    min-height:calc(100vh - 160px) !important;
+    background:linear-gradient(135deg,#f3f9f4,#e2f2e8,#ffffff) !important;
+    display:flex !important;
+    justify-content:center !important;
+    align-items:center !important;
+    padding:40px 20px !important;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    color:#1f3d2b !important;
+}
+
+.auth-page a{
+    text-decoration:none !important;
+    color:inherit !important;
+}
+
+/* ========================= */
+/* ===== CONTENEDORES ====== */
+/* ========================= */
+
+.auth-wrapper{
+    width:100% !important;
+    display:flex !important;
+    justify-content:center !important;
+    align-items:center !important;
+}
+
+.login-card{
+    width:100% !important;
+    max-width:430px !important;
+    background:#ffffff !important;
+    padding:40px 32px !important;
+    border-radius:20px !important;
+    border:1px solid #dbe9df !important;
+    box-shadow:0 10px 30px rgba(0,0,0,0.10) !important;
+    color:#1f3d2b !important;
+    text-align:center !important;
+}
+
+/* ========================= */
+/* ===== TÍTULO ============ */
+/* ========================= */
+
+.auth-page .login-card h1,
+.login-card h1{
+    margin-bottom:28px !important;
+    font-size:2rem !important;
+    font-weight:700 !important;
+    color:#2f7a4b !important;
+    letter-spacing:.3px !important;
+    text-align:center !important;
+}
+
+/* ========================= */
+/* ===== FORMULARIO ======== */
+/* ========================= */
+
+.login-card form{
+    width:100% !important;
+    text-align:left !important;
+}
+
+.form-group{
+    margin-bottom:18px !important;
+}
+
+.form-group label{
+    display:block !important;
+    margin-bottom:8px !important;
+    color:#1f3d2b !important;
+    font-weight:700 !important;
+    font-size:14px !important;
+    text-align:left !important;
+}
+
+/* ========================= */
+/* ===== INPUTS ============ */
+/* ========================= */
+
+.login-card input,
+.login-card select,
+.login-card textarea,
+.form-group input,
+.form-group select,
+.form-group textarea{
+    width:100% !important;
+    padding:14px 16px !important;
+    border:1.5px solid #bfd8c7 !important;
+    border-radius:14px !important;
+    background:#f8fbf9 !important;
+    color:#355c46 !important;
+    font-size:16px !important;
+    line-height:1.4 !important;
+    box-shadow:none !important;
+    outline:none !important;
+}
+
+/* Placeholder visible */
+.login-card input::placeholder,
+.login-card select::placeholder,
+.login-card textarea::placeholder,
+.form-group input::placeholder,
+.form-group textarea::placeholder{
+    color:#6f927d !important;
+    opacity:1 !important;
+}
+
+/* Focus visible */
+.login-card input:focus,
+.login-card select:focus,
+.login-card textarea:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    background:#ffffff !important;
+    color:#1f3d2b !important;
+    border:2px solid #4d8f67 !important;
+    box-shadow:0 0 0 4px rgba(106,168,134,0.18) !important;
+    outline:none !important;
+}
+
+/* Para autofill del navegador */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+select:-webkit-autofill,
+textarea:-webkit-autofill{
+    -webkit-text-fill-color:#1f3d2b !important;
+    -webkit-box-shadow:0 0 0px 1000px #f8fbf9 inset !important;
+    transition:background-color 9999s ease-in-out 0s !important;
+}
+
+/* ========================= */
+/* ===== BOTÓN PRINCIPAL === */
+/* ========================= */
+
+.login-card button,
+.login-card input[type="submit"],
+.login-card .btn,
+.btn-login,
+.btn-register{
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:100% !important;
+    padding:14px 20px !important;
+    font-size:16px !important;
+    font-weight:700 !important;
+    border:none !important;
+    border-radius:14px !important;
+    cursor:pointer !important;
+    text-decoration:none !important;
+    transition:all .28s ease !important;
+    background:linear-gradient(135deg,#154626,#1f5c33) !important;
+    color:#ffffff !important;
+    box-shadow:0 8px 20px rgba(21,70,38,0.22) !important;
+}
+
+.login-card button:hover,
+.login-card input[type="submit"]:hover,
+.login-card .btn:hover,
+.btn-login:hover,
+.btn-register:hover{
+    background:linear-gradient(135deg,#1f5c33,#3f7f55) !important;
+    color:#ffffff !important;
+    transform:translateY(-2px) !important;
+    box-shadow:0 14px 28px rgba(31,92,51,0.28) !important;
+}
+
+/* ========================= */
+/* ===== LINKS INTERNOS ==== */
+/* ========================= */
+
+.login-card .links{
+    margin-top:18px !important;
+    font-size:14px !important;
+    color:#5f7f6c !important;
+    text-align:center !important;
+}
+
+.login-card .links a{
+    color:#2f7a4b !important;
+    font-weight:700 !important;
+    text-decoration:none !important;
+}
+
+.login-card .links a:hover{
+    color:#154626 !important;
+    text-decoration:underline !important;
+}
+
+/* ========================= */
+/* ===== MENSAJES ========== */
+/* ========================= */
+
+.login-card .error,
+.text-danger{
+    color:#b42318 !important;
+    font-size:14px !important;
+    margin-top:6px !important;
+    margin-bottom:10px !important;
+    text-align:left !important;
+}
+
+.alert-success,
+.alert-danger,
+.alert-error,
+.alert-info{
+    border-radius:12px !important;
+    padding:12px 16px !important;
+    margin-bottom:16px !important;
+    font-size:14px !important;
+    font-weight:600 !important;
+    text-align:left !important;
+}
+
+.alert-success{
+    background:#ecf8f0 !important;
+    border:1px solid #b7dfc2 !important;
+    color:#256c3a !important;
+}
+
+.alert-danger,
+.alert-error{
+    background:#fff1f0 !important;
+    border:1px solid #f0c7c2 !important;
+    color:#b42318 !important;
+}
+
+.alert-info{
+    background:#eef7f1 !important;
+    border:1px solid #cfe7d7 !important;
+    color:#3f7f55 !important;
+}
+
+/* ========================= */
+/* ===== HELP TEXT ========= */
+/* ========================= */
+
+.help-text,
+.form-text,
+small{
+    display:block !important;
+    font-size:13px !important;
+    color:#5d6f63 !important;
+    margin-top:6px !important;
+    text-align:left !important;
+    line-height:1.45 !important;
+    opacity:1 !important;
+}
+
+/* ========================= */
+/* ===== RESPONSIVE ======== */
+/* ========================= */
+
+@media screen and (max-width:768px){
+    .auth-page{
+        padding:30px 16px !important;
+    }
+
+    .login-card{
+        padding:30px 22px !important;
+        border-radius:18px !important;
+    }
+
+    .login-card h1{
+        font-size:1.7rem !important;
+        margin-bottom:24px !important;
+    }
+}
+
+@media screen and (max-width:400px){
+    .login-card{
+        padding:24px 18px !important;
+    }
+
+    .login-card h1{
+        font-size:1.45rem !important;
+    }
+
+    .login-card input,
+    .login-card select,
+    .login-card textarea,
+    .login-card button{
+        font-size:15px !important;
+    }
+}

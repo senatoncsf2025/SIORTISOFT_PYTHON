@@ -1,0 +1,475 @@
+<div id="estadisticoSection" class="card shadow-sm border-0 {% if estadistico_generado %}show{% else %}d-none{% endif %} mt-4">
+        <div class="card-header bg-dark text-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="mb-0">Reportes estadísticos de {{ rol_titulo }}</h5>
+                <small>Consulta métricas generales, usuarios dentro, horas pico y actividad.</small>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button
+                    type="button"
+                    id="exportarEstadisticoPdfBtn"
+                    data-pdf-url="{% url estadistico_pdf_url_name %}"
+                    class="btn btn-light btn-sm">
+                    📄 Exportar PDF estadístico
+                </button>
+
+                <button type="button" id="cerrarEstadisticoBtn" class="btn btn-outline-light btn-sm">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <form id="estadisticoForm" method="get" class="row g-3 mb-4">
+                <input type="hidden" name="generar_estadistico" value="1">
+
+                <div class="col-md-4">
+                    <label class="form-label">Fecha inicio</label>
+                    <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Fecha fin</label>
+                    <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+                </div>
+
+                <div class="col-md-4 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Generar estadísticas
+                    </button>
+                    <a href="{% url index_url_name %}" class="btn btn-outline-secondary">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+
+            {% if error_fecha_estadistica %}
+            <div class="alert alert-warning">
+                {{ error_fecha_estadistica }}
+            </div>
+            {% endif %}
+
+            <!-- TARJETAS -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 bg-primary-subtle h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Total usuarios</div>
+                            <div class="fs-3 fw-bold">{{ total_usuarios|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 bg-success-subtle h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Total movimientos</div>
+                            <div class="fs-3 fw-bold">{{ total_movimientos|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 bg-info-subtle h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Ingresos</div>
+                            <div class="fs-3 fw-bold">{{ total_ingresos|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 bg-warning-subtle h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Salidas</div>
+                            <div class="fs-3 fw-bold">{{ total_salidas|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 bg-dark text-white h-100">
+                        <div class="card-body">
+                            <div class="small">Dentro actualmente</div>
+                            <div class="fs-3 fw-bold">{{ total_dentro|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 bg-secondary-subtle h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Sin movimientos</div>
+                            <div class="fs-3 fw-bold">{{ usuarios_sin_movimientos|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 bg-light h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Prom. ingresos / día</div>
+                            <div class="fs-3 fw-bold">{{ promedio_ingresos_dia|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 bg-light h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Prom. movimientos / día</div>
+                            <div class="fs-3 fw-bold">{{ promedio_movimientos_dia|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTEOS ACTUALES -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light">
+                            <strong>Conteos actuales</strong>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Hoy</span>
+                                    <strong>{{ conteo_hoy|default:0 }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Semana</span>
+                                    <strong>{{ conteo_semana|default:0 }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Mes</span>
+                                    <strong>{{ conteo_mes|default:0 }}</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light">
+                            <strong>Horas pico</strong>
+                        </div>
+                        <div class="card-body">
+                            {% if horas_pico %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Hora</th>
+                                                <th>Total movimientos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in horas_pico %}
+                                            <tr>
+                                                <td>{{ item.hora }}:00</td>
+                                                <td>{{ item.total }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">No hay datos de horas pico para el rango seleccionado.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INGRESOS / SALIDAS POR DIA -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light">
+                            <strong>Ingresos por día</strong>
+                        </div>
+                        <div class="card-body">
+                            {% if ingresos_por_dia %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in ingresos_por_dia %}
+                                            <tr>
+                                                <td>{{ item.dia|date:"Y-m-d" }}</td>
+                                                <td>{{ item.total }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">No hay ingresos en el rango seleccionado.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light">
+                            <strong>Salidas por día</strong>
+                        </div>
+                        <div class="card-body">
+                            {% if salidas_por_dia %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in salidas_por_dia %}
+                                            <tr>
+                                                <td>{{ item.dia|date:"Y-m-d" }}</td>
+                                                <td>{{ item.total }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">No hay salidas en el rango seleccionado.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FRECUENTES -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light">
+                            <strong>Usuarios más frecuentes</strong>
+                        </div>
+                        <div class="card-body">
+                            {% if usuarios_frecuentes %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Cédula</th>
+                                                <th>Total movimientos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for u in usuarios_frecuentes %}
+                                            <tr>
+                                                <td>{{ u.nombre_completo }}</td>
+                                                <td>{{ u.cedula }}</td>
+                                                <td>{{ u.total_movimientos }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">No hay usuarios frecuentes para mostrar.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light">
+                            <strong>Usuarios menos frecuentes</strong>
+                        </div>
+                        <div class="card-body">
+                            {% if usuarios_menos %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Cédula</th>
+                                                <th>Total movimientos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for u in usuarios_menos %}
+                                            <tr>
+                                                <td>{{ u.nombre_completo }}</td>
+                                                <td>{{ u.cedula }}</td>
+                                                <td>{{ u.total_movimientos }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">No hay usuarios menos frecuentes para mostrar.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DENTRO ACTUALMENTE -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-light">
+                    <strong>Quién está adentro actualmente</strong>
+                </div>
+                <div class="card-body">
+                    {% if dentro %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Cédula</th>
+                                        <th>Último movimiento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for d in dentro %}
+                                    <tr>
+                                        <td>{{ d.nombre_completo }}</td>
+                                        <td>{{ d.cedula }}</td>
+                                        <td>
+                                            {% if d.ultima_fecha %}
+                                                {{ d.ultima_fecha|date:"Y-m-d H:i" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-muted">No hay personas dentro en este momento.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- DISTRIBUCIONES -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light">
+                            <strong>Distribución por género</strong>
+                        </div>
+                        <div class="card-body">
+                            {% if distribucion_genero %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Género</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in distribucion_genero %}
+                                            <tr>
+                                                <td>{{ item.genero|default:"Sin definir" }}</td>
+                                                <td>{{ item.total }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">No hay datos de género.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light">
+                            <strong>Distribución por tipo de usuario</strong>
+                        </div>
+                        <div class="card-body">
+                            {% if distribucion_tipo_usuario %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Tipo</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in distribucion_tipo_usuario %}
+                                            <tr>
+                                                <td>{{ item.tipo_usuario|default:"Sin definir" }}</td>
+                                                <td>{{ item.total }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">No hay datos de tipo de usuario.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ULTIMOS MOVIMIENTOS -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <strong>Últimos movimientos</strong>
+                </div>
+                <div class="card-body">
+                    {% if ultimos_movimientos %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Usuario</th>
+                                        <th>Cédula</th>
+                                        <th>Tipo</th>
+                                        <th>Registrado por</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for m in ultimos_movimientos %}
+                                    <tr>
+                                        <td>{{ m.fecha|date:"Y-m-d H:i" }}</td>
+                                        <td>{{ m.usuario.nombre_completo }}</td>
+                                        <td>{{ m.usuario.cedula }}</td>
+                                        <td>{{ m.tipo|capfirst }}</td>
+                                        <td>
+                                            {% if m.registrado_por %}
+                                                {{ m.registrado_por.nombre_completo }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-muted">No hay movimientos recientes.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

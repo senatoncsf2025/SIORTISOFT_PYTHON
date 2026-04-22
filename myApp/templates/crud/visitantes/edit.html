@@ -1,0 +1,80 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Editar {{ rol_singular|capfirst }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Editar {{ rol_singular|capfirst }}</h1>
+        <a href="{% url index_url_name %}" class="btn btn-secondary">Volver</a>
+    </div>
+
+    <form method="post" class="card shadow-sm p-4">
+        {% csrf_token %}
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <input type="text" n    ame="nombre" class="form-control" value="{{ usuario.nombre }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Apellido</label>
+                <input type="text" name="apellido" class="form-control" value="{{ usuario.apellido|default:'' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Cédula</label>
+                <input type="text" name="cedula" class="form-control" value="{{ usuario.cedula }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" value="{{ usuario.email|default:'' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                <input type="text" name="telefono" class="form-control" value="{{ usuario.telefono|default:'' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Dirección</label>
+                <input type="text" name="direccion" class="form-control" value="{{ usuario.direccion|default:'' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Género</label>
+                <select name="genero" class="form-select">
+                    <option value="">Seleccione</option>
+                    {% for value, label in generos %}
+                        <option value="{{ value }}" {% if usuario.genero == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Tipo de usuario</label>
+                <select name="tipo_usuario" class="form-select">
+                    <option value="">Seleccione</option>
+                    {% for value, label in tipos_usuario %}
+                        <option value="{{ value }}" {% if usuario.tipo_usuario == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Fecha de nacimiento</label>
+                <input type="date" name="fecha_nacimiento" class="form-control" value="{% if usuario.fecha_nacimiento %}{{ usuario.fecha_nacimiento|date:'Y-m-d' }}{% endif %}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Cargo</label>
+                <input type="text" name="cargo" class="form-control" value="{{ usuario.cargo|default:'' }}">
+            </div>
+            {% if rol == 'vigilantes' %}
+            <div class="col-md-6">
+                <label class="form-label">Código de vigilante</label>
+                <input type="text" name="codigo_vigilante" class="form-control" value="{{ usuario.codigo_vigilante|default:'' }}">
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <a href="{% url index_url_name %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

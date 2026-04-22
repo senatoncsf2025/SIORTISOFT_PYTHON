@@ -1,0 +1,58 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Gestión de {{ rol_titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="mb-1">Gestión de {{ rol_titulo }}</h1>
+            <p class="text-muted mb-0">Administra registros, búsquedas y reportes.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url create_url_name %}" class="btn btn-success">
+                + Nuevo {{ rol_singular|capfirst }}
+            </a>
+
+            <button class="btn btn-outline-primary"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#busquedaCollapse"
+                    aria-expanded="{% if filtros_busqueda.buscar_nombre or filtros_busqueda.buscar_cedula %}true{% else %}false{% endif %}"
+                    aria-controls="busquedaCollapse">
+                🔎 Buscar persona
+            </button>
+
+            <button id="generarReporteBtn" type="button" class="btn btn-info">
+                📄 Generar reporte
+            </button>
+
+            <button id="generarEstadisticoBtn" type="button" class="btn btn-dark">
+                📊 Reportes estadísticos
+            </button>
+        </div>
+    </div>
+
+    <div id="alert-container"></div>
+
+    {% if error_fecha_reporte %}
+    <div class="alert alert-warning">
+        {{ error_fecha_reporte }}
+    </div>
+    {% endif %}
+
+    {% include "crud/partials/_busqueda_rapida.html" %}
+    {% include "crud/partials/_tabla_principal.html" %}
+    {% include "crud/partials/_reporte.html" %}
+    {% include "crud/partials/_estadisticos.html" %}
+</div>
+
+<form id="csrf-form" style="display:none;">
+    {% csrf_token %}
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+    {% include "crud/partials/_scripts_index.html" %}
+{% endblock %}

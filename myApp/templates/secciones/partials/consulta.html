@@ -1,0 +1,156 @@
+<div
+    class="card p-4 {% if mostrar_form_consulta or cedula or tipo or observaciones or errors %}d-block{% else %}d-none{% endif %}"
+    id="formConsulta"
+>
+    <h4 class="mb-3">Registro de movimiento de {{ rol|capfirst }}</h4>
+
+    <form method="POST" action="">
+        {% csrf_token %}
+        <input type="hidden" name="formulario" value="consulta">
+
+        <div class="mb-3">
+            <label for="cedula" class="form-label">
+                Documento <span class="text-danger">*</span>
+            </label>
+            <input
+                type="text"
+                class="form-control {% if errors.cedula %}is-invalid{% endif %}"
+                id="cedula"
+                name="cedula"
+                value="{{ cedula|default:'' }}"
+                required
+            >
+            {% if errors.cedula %}
+                <div class="invalid-feedback">{{ errors.cedula }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="tipo" class="form-label">
+                Tipo de Movimiento <span class="text-danger">*</span>
+            </label>
+            <select
+                name="tipo"
+                id="tipo"
+                class="form-control {% if errors.tipo %}is-invalid{% endif %}"
+                required
+            >
+                <option value="">Seleccione...</option>
+                <option value="ingreso" {% if tipo == 'ingreso' %}selected{% endif %}>Ingreso</option>
+                <option value="salida" {% if tipo == 'salida' %}selected{% endif %}>Salida</option>
+            </select>
+            {% if errors.tipo %}
+                <div class="invalid-feedback">{{ errors.tipo }}</div>
+            {% endif %}
+        </div>
+
+        <hr class="my-4">
+
+        <h5 class="mb-3">Elementos que trae</h5>
+
+        <div class="mb-3">
+            <label class="form-label">¿Trae vehículo?</label>
+            <select
+                name="trae_vehiculo"
+                id="trae_vehiculo_consulta"
+                class="form-control"
+            >
+                <option value="0" {% if trae_vehiculo == '0' or trae_vehiculo == 0 or not trae_vehiculo %}selected{% endif %}>No</option>
+                <option value="1" {% if trae_vehiculo == '1' or trae_vehiculo == 1 %}selected{% endif %}>Sí</option>
+            </select>
+        </div>
+
+        <div
+            id="vehiculoFieldsConsulta"
+            class="{% if trae_vehiculo != '1' and trae_vehiculo != 1 %}d-none{% endif %}"
+        >
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Placa</label>
+                    <input
+                        type="text"
+                        name="placa"
+                        class="form-control {% if errors.placa %}is-invalid{% endif %}"
+                        value="{{ placa|default:'' }}"
+                    >
+                    {% if errors.placa %}
+                        <div class="invalid-feedback">{{ errors.placa }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Marca</label>
+                    <input
+                        type="text"
+                        name="marca"
+                        class="form-control"
+                        value="{{ marca|default:'' }}"
+                    >
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Modelo</label>
+                    <input
+                        type="text"
+                        name="modelo"
+                        class="form-control"
+                        value="{{ modelo|default:'' }}"
+                    >
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Color</label>
+                    <input
+                        type="text"
+                        name="color"
+                        class="form-control"
+                        value="{{ color|default:'' }}"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">¿Trae PC?</label>
+            <select
+                name="trae_pc"
+                id="trae_pc_consulta"
+                class="form-control"
+            >
+                <option value="0" {% if trae_pc == '0' or trae_pc == 0 or not trae_pc %}selected{% endif %}>No</option>
+                <option value="1" {% if trae_pc == '1' or trae_pc == 1 %}selected{% endif %}>Sí</option>
+            </select>
+        </div>
+
+        <div
+            id="pcFieldsConsulta"
+            class="{% if trae_pc != '1' and trae_pc != 1 %}d-none{% endif %}"
+        >
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Serial del PC</label>
+                    <input
+                        type="text"
+                        name="serial"
+                        class="form-control {% if errors.serial %}is-invalid{% endif %}"
+                        value="{{ serial|default:'' }}"
+                    >
+                    {% if errors.serial %}
+                        <div class="invalid-feedback">{{ errors.serial }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="observaciones" class="form-label">Observaciones (opcional)</label>
+            <textarea
+                name="observaciones"
+                id="observaciones"
+                class="form-control"
+            >{{ observaciones|default:'' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registrar Movimiento</button>
+    </form>
+</div>

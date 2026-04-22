@@ -1,0 +1,212 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Dashboard - SIORTISOFT{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <button class="sidebar-toggle" id="sidebarToggle" type="button">☰</button>
+
+    <div class="sidebar" id="sidebar">
+        <br>
+
+        <hr>
+        
+        <a href="{% url 'docentes.index' %}">Docentes</a>
+        <a href="{% url 'oficinas.index' %}">Oficinas</a>
+        <a href="{% url 'vigilantes.index' %}">Vigilantes</a>
+        <a href="{% url 'enfermeria.index' %}">Enfermería</a>
+        <a href="{% url 'parqueadero.index' %}">Parqueadero</a>
+        <a href="{% url 'visitantes.index' %}">Visitantes</a>
+        <a href="{% url 'acudientes.index' %}">Acudientes</a>
+        <a href="{% url 'estudiantes.index' %}">Estudiantes</a>
+        <a href="{% url 'personal.index' %}">Personal</a>
+        <a href="{% url 'carga_masiva' %}">Carga masiva</a>
+
+        <div class="user-box">
+            <p>{{ request.user.nombre }}</p>    
+        </div>
+    </div>
+
+    <div class="main-panel">
+        <h1>Panel de Control</h1>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="usuarios">0</div>
+                <div class="stat-title">Usuarios</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number" id="estudiantes">0</div>
+                <div class="stat-title">Estudiantes</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number" id="docentes">0</div>
+                <div class="stat-title">Docentes</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number" id="visitantes">0</div>
+                <div class="stat-title">Visitantes Hoy</div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm p-4 mb-4">
+            <h4 class="mb-3">Búsqueda y filtros</h4>
+
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="cedula" class="form-label">Buscar por documento</label>
+                    <input type="text" name="cedula" id="cedula" class="form-control" value="{{ cedula }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" name="nombre" id="nombre" class="form-control" value="{{ nombre }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="apellido" class="form-label">Apellido</label>
+                    <input type="text" name="apellido" id="apellido" class="form-control" value="{{ apellido }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="subrol" class="form-label">Tipo de persona</label>
+                    <select name="subrol" id="subrol" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="acudientes" {% if subrol_filtro == "acudientes" %}selected{% endif %}>Acudientes</option>
+                        <option value="docentes" {% if subrol_filtro == "docentes" %}selected{% endif %}>Docentes</option>
+                        <option value="estudiantes" {% if subrol_filtro == "estudiantes" %}selected{% endif %}>Estudiantes</option>
+                        <option value="enfermeria" {% if subrol_filtro == "enfermeria" %}selected{% endif %}>Enfermería</option>
+                        <option value="oficinas" {% if subrol_filtro == "oficinas" %}selected{% endif %}>Oficinas</option>
+                        <option value="parqueadero" {% if subrol_filtro == "parqueadero" %}selected{% endif %}>Parqueadero</option>
+                        <option value="personal" {% if subrol_filtro == "personal" %}selected{% endif %}>Personal</option>
+                        <option value="visitantes" {% if subrol_filtro == "visitantes" %}selected{% endif %}>Visitantes</option>
+                        <option value="vigilantes" {% if subrol_filtro == "vigilantes" %}selected{% endif %}>Vigilantes</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="tipo_usuario" class="form-label">Tipo usuario</label>
+                    <select name="tipo_usuario" id="tipo_usuario" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="INTERNO" {% if tipo_usuario == "INTERNO" %}selected{% endif %}>INTERNO</option>
+                        <option value="EXTERNO" {% if tipo_usuario == "EXTERNO" %}selected{% endif %}>EXTERNO</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="genero" class="form-label">Género</label>
+                    <select name="genero" id="genero" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Masculino" {% if genero == "Masculino" %}selected{% endif %}>Masculino</option>
+                        <option value="Femenino" {% if genero == "Femenino" %}selected{% endif %}>Femenino</option>
+                        <option value="Otro" {% if genero == "Otro" %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
+
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{% url 'index2' %}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+
+        {% if page_obj.object_list %}
+            {% for seccion in page_obj %}
+                {% include "partials/tabla_usuarios.html" with seccion=seccion %}
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-warning">
+                No se encontraron resultados con los filtros aplicados.
+            </div>
+        {% endif %}
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav aria-label="Paginación de tablas">
+            <ul class="pagination justify-content-center mt-4">
+
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page_obj.previous_page_number }}&cedula={{ cedula }}&nombre={{ nombre }}&apellido={{ apellido }}&subrol={{ subrol_filtro }}&tipo_usuario={{ tipo_usuario }}&genero={{ genero }}">
+                           Anterior
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ num }}&cedula={{ cedula }}&nombre={{ nombre }}&apellido={{ apellido }}&subrol={{ subrol_filtro }}&tipo_usuario={{ tipo_usuario }}&genero={{ genero }}">
+                               {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page_obj.next_page_number }}&cedula={{ cedula }}&nombre={{ nombre }}&apellido={{ apellido }}&subrol={{ subrol_filtro }}&tipo_usuario={{ tipo_usuario }}&genero={{ genero }}">
+                           Siguiente
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function actualizarDashboard() {
+        fetch("/dashboard-data/")
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("usuarios").innerText = data.usuarios;
+                document.getElementById("estudiantes").innerText = data.estudiantes;
+                document.getElementById("docentes").innerText = data.docentes;
+                document.getElementById("visitantes").innerText = data.visitantes;
+            });
+    }
+
+    setInterval(actualizarDashboard, 3000);
+    actualizarDashboard();
+
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebar = document.getElementById("sidebar");
+
+    sidebarToggle.addEventListener("click", function () {
+        document.body.classList.toggle("sidebar-open");
+    });
+
+    document.addEventListener("click", function (e) {
+        const isMobile = window.innerWidth <= 768;
+        if (
+            isMobile &&
+            document.body.classList.contains("sidebar-open") &&
+            !sidebar.contains(e.target) &&
+            !sidebarToggle.contains(e.target)
+        ) {
+            document.body.classList.remove("sidebar-open");
+        }
+    });
+
+    window.addEventListener("resize", function () {
+        if (window.innerWidth > 768) {
+            document.body.classList.remove("sidebar-open");
+        }
+    });
+</script>
+{% endblock %}

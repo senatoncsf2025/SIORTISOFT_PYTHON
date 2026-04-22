@@ -1,0 +1,37 @@
+{% extends 'layouts/app.html' %}
+{% load static %}
+
+{% block title %}Sección {{ rol_titulo|default:rol|capfirst }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">Módulo de {{ rol_titulo|default:rol|capfirst }}</h2>
+
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="text-center mb-4">
+        <button class="btn btn-primary mx-2" id="btnConsulta" type="button">
+            Consulta
+        </button>
+        <button class="btn btn-success mx-2" id="btnRegistro" type="button">
+            Registro {{ rol_singular|default:rol|capfirst }}
+        </button>
+    </div>
+
+    {% include 'secciones/partials/consulta.html' with rol=rol %}
+    {% include 'secciones/partials/registro.html' with rol=rol rol_singular=rol_singular %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/toggle_forms.js' %}"></script>
+{% endblock %}

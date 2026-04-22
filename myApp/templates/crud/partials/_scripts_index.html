@@ -1,0 +1,178 @@
+<script>
+function toggleEstadoHandler(event) {
+    const button = event.currentTarget;
+    const url = button.dataset.url;
+    const action = button.dataset.action;
+    const editUrl = button.dataset.editUrl;
+    const row = button.closest('tr');
+    const estadoCell = row.querySelector('.estado');
+    const accionesCell = row.querySelector('.acciones');
+
+    if (!confirm(`¿Seguro que deseas ${action} este registro?`)) return;
+
+    const tokenInput = document.querySelector('#csrf-form [name=csrfmiddlewaretoken]');
+    const token = tokenInput ? tokenInput.value : '';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': token,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message || 'No se pudo procesar la solicitud');
+        }
+
+        document.getElementById('alert-container').innerHTML = `
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+
+        if (data.activo) {
+            estadoCell.innerHTML = '<span class="badge bg-success">Activo</span>';
+            accionesCell.innerHTML = `
+                <a href="${editUrl}" class="btn btn-warning btn-sm">Editar</a>
+                <button
+                    type="button"
+                    class="btn btn-danger btn-sm toggle-estado"
+                    data-url="${data.toggle_url}"
+                    data-action="inactivar"
+                    data-edit-url="${editUrl}">
+                    Inactivar
+                </button>
+            `;
+        } else {
+            estadoCell.innerHTML = '<span class="badge bg-secondary">Inactivo</span>';
+            accionesCell.innerHTML = `
+                <a href="${editUrl}" class="btn btn-warning btn-sm">Editar</a>
+                <button
+                    type="button"
+                    class="btn btn-success btn-sm toggle-estado"
+                    data-url="${data.toggle_url}"
+                    data-action="activar"
+                    data-edit-url="${editUrl}">
+                    Activar
+                </button>
+            `;
+        }
+
+        accionesCell.querySelectorAll('.toggle-estado').forEach(btn => {
+            btn.addEventListener('click', toggleEstadoHandler);
+        });
+    })
+    .catch(error => {
+        alert(error.message || 'Error al procesar la solicitud');
+    });
+}
+
+function toggleColumn(columnClass, visible) {
+    document.querySelectorAll('.' + columnClass).forEach(el => {
+        el.classList.toggle('d-none', !visible);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.toggle-estado').forEach(button => {
+        button.addEventListener('click', toggleEstadoHandler);
+    });
+
+    const generarReporteBtn = document.getElementById('generarReporteBtn');
+    const cerrarReporteBtn = document.getElementById('cerrarReporteBtn');
+    const reporteSection = document.getElementById('reporteSection');
+    const camposReporte = document.querySelectorAll('.reporte-campo');
+    const exportarPdfBtn = document.getElementById('exportarPdfBtn');
+    const reporteForm = document.getElementById('reporteForm');
+
+    if (generarReporteBtn && reporteSection) {
+        generarReporteBtn.addEventListener('click', function () {
+            reporteSection.classList.remove('d-none');
+            reporteSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    if (cerrarReporteBtn && reporteSection) {
+        cerrarReporteBtn.addEventListener('click', function () {
+            reporteSection.classList.add('d-none');
+        });
+    }
+
+    camposReporte.forEach(campo => {
+        toggleColumn(campo.dataset.col, campo.checked);
+
+        campo.addEventListener('change', function () {
+            toggleColumn(this.dataset.col, this.checked);
+        });
+    });
+
+    if (exportarPdfBtn && reporteForm) {
+        exportarPdfBtn.addEventListener('click', function () {
+            const pdfUrl = this.dataset.pdfUrl;
+            const formData = new FormData(reporteForm);
+            const params = new URLSearchParams();
+
+            for (const [key, value] of formData.entries()) {
+                if (key.startsWith('mostrar_')) {
+                    continue;
+                }
+                params.append(key, value);
+            }
+
+            document.querySelectorAll('.reporte-campo').forEach(campo => {
+                params.set(campo.name, campo.checked ? '1' : '0');
+            });
+
+            window.open(`${pdfUrl}?${params.toString()}`, '_blank');
+        });
+    }
+
+    const generarEstadisticoBtn = document.getElementById('generarEstadisticoBtn');
+    const cerrarEstadisticoBtn = document.getElementById('cerrarEstadisticoBtn');
+    const estadisticoSection = document.getElementById('estadisticoSection');
+    const estadisticoForm = document.getElementById('estadisticoForm');
+    const exportarEstadisticoPdfBtn = document.getElementById('exportarEstadisticoPdfBtn');
+
+    if (generarEstadisticoBtn && estadisticoSection) {
+        generarEstadisticoBtn.addEventListener('click', function () {
+            estadisticoSection.classList.remove('d-none');
+            estadisticoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    if (cerrarEstadisticoBtn && estadisticoSection) {
+        cerrarEstadisticoBtn.addEventListener('click', function () {
+            estadisticoSection.classList.add('d-none');
+        });
+    }
+
+    if (estadisticoForm) {
+        estadisticoForm.addEventListener('submit', function () {
+            if (estadisticoSection) {
+                estadisticoSection.classList.remove('d-none');
+            }
+        });
+    }
+
+    if (exportarEstadisticoPdfBtn && estadisticoForm) {
+        exportarEstadisticoPdfBtn.addEventListener('click', function () {
+            const pdfUrl = this.dataset.pdfUrl;
+            const formData = new FormData(estadisticoForm);
+            const params = new URLSearchParams();
+
+            for (const [key, value] of formData.entries()) {
+                params.append(key, value);
+            }
+
+            params.set('generar_estadistico', '1');
+
+            window.open(`${pdfUrl}?${params.toString()}`, '_blank');
+        });
+    }
+});
+</script>

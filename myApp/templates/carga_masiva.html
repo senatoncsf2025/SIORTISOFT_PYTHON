@@ -1,0 +1,56 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Carga Masiva - SIORTISOFT{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow p-4">
+        <h2 class="mb-4">Carga masiva de usuarios</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="alert alert-info">
+            El archivo debe ser CSV y contener una columna llamada <strong>tipo_persona</strong>.
+            <br>
+            Valores permitidos:
+            acudientes, docentes, estudiantes, enfermeria, oficinas, parqueadero, personal, visitantes, vigilantes.
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="archivo" class="form-label">Archivo CSV</label>
+                <input type="file" name="archivo" id="archivo" class="form-control" accept=".csv" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Subir archivo
+            </button>
+        </form>
+
+        {% if creados %}
+            <div class="alert alert-success mt-4">
+                Registros creados: {{ creados }}
+            </div>
+        {% endif %}
+
+        {% if errores %}
+            <div class="alert alert-danger mt-4">
+                <h5>Errores encontrados:</h5>
+                <ul class="mb-0">
+                    {% for error in errores %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+<div class="table-container mb-5">
+    <h3>{{ seccion.titulo }}</h3>
+
+    <table class="data-table table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Cédula</th>
+                <th>Teléfono</th>
+                <th>Género</th>
+                <th>Tipo Usuario</th>
+                <th>Cargo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if seccion.usuarios %}
+                {% for usuario in seccion.usuarios %}
+                    <tr>
+                        <td>{{ usuario.nombre }}</td>
+                        <td>{{ usuario.apellido|default:"-" }}</td>
+                        <td>{{ usuario.cedula }}</td>
+                        <td>{{ usuario.telefono|default:"-" }}</td>
+                        <td>{{ usuario.genero|default:"-" }}</td>
+                        <td>{{ usuario.tipo_usuario|default:"-" }}</td>
+                        <td>{{ usuario.cargo|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7">No hay registros</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>

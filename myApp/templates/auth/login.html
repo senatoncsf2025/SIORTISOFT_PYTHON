@@ -1,0 +1,35 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block main_class %}auth-page py-5{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="login-card">
+        <h1>Login</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="email" name="email" placeholder="Correo" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Ingresar</button>
+        </form>
+
+        <div class="links">
+            <a href="#">Olvidé mi contraseña</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

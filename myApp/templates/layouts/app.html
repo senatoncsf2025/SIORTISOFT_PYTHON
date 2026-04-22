@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SIORTISOFT{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow" id="sebas">
+        <div class="container">
+            {% if request.user.is_authenticated %}
+            {% if request.user.rol == 'admin' %}
+            <a class="navbar-brand fw-bold" href="{% url 'index2' %}">
+                SIORTISOFT
+            </a>
+            {% elif request.user.rol == 'vigilante' %}
+            <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
+                SIORTISOFT
+            </a>
+            {% else %}
+            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+                SIORTISOFT
+            </a>
+            {% endif %}
+            {% else %}
+            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+                SIORTISOFT
+            </a>
+            {% endif %}
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSiortisoft"
+                aria-controls="navbarSiortisoft" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSiortisoft">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+
+                    <!-- Inicio -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Inicio</a>
+                    </li>
+
+                    {% if request.user.is_authenticated %}
+
+                    <!-- 🔽 DROPDOWN PANELES -->
+                    {% if request.user.rol == 'admin' or request.user.rol == 'vigilante' %}
+                    <li class="nav-item dropdown">
+                        <a class="btn btn-primary dropdown-toggle" href="#" id="accionesDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            📊 Paneles
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+
+                            {% if request.user.rol == 'admin' %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'index2' %}">
+                                    <i class="bi bi-speedometer2"></i> Panel Admin
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            <li>
+                                <a class="dropdown-item" href="{% url 'dashboard' %}">
+                                    <i class="bi bi-shield-lock"></i> Panel Vigilante
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- 🔽 DROPDOWN ACCIONES -->
+                    <li class="nav-item dropdown">
+                        <a class="btn btn-primary dropdown-toggle" href="#" id="accionesDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-plus-circle"></i> Acciones
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+
+                            <!-- Siempre disponible -->
+                            <li>
+                                <a class="dropdown-item" href="{% url 'registro_visita' %}">
+                                    <i class="bi bi-person-plus"></i> Registrar visita
+                                </a>
+                            </li>
+
+                            <!-- Solo admin -->
+                            {% if request.user.rol == 'admin' %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'register' %}">
+                                    <i class="bi bi-person-plus-fill"></i> Registrar usuario
+                                </a>
+                            </li>
+                            {% endif %}
+
+                        </ul>
+                    </li>
+
+                    <!-- Usuario -->
+                    <li class="nav-item">
+                        <span class="nav-link text-white">
+                            Hola, {{ request.user.nombre }}
+                        </span>
+                    </li>
+
+                    <!-- Logout -->
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light" href="{% url 'logout' %}">
+                            <i class="bi bi-box-arrow-right"></i> Salir
+                        </a>
+                    </li>
+
+                    {% else %}
+
+                    <!-- Acciones público -->
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="{% url 'registro_visita' %}">
+                            <i class="bi bi-person-plus"></i> Registrar visita
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+                        </a>
+                    </li>
+
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="{% block main_class %}container py-5{% endblock %}">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-white text-center py-4 mt-5" id="sebas1">
+        <div class="container">
+            <p class="mb-0">© 2026 SIORTISOFT. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

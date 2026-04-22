@@ -1,0 +1,89 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Panel Vigilante - SIORTISOFT{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/vigilante.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="vigilante-wrap">
+
+        <section class="welcome-box">
+            <div class="welcome-badge">Panel principal</div>
+            <h1 class="welcome-title">Bienvenido, {{ request.user.nombre }}</h1>
+            <p class="welcome-text">
+                Desde este panel puedes acceder de forma rápida y ordenada a los módulos del sistema.
+            </p>
+        </section>
+
+        <section class="quick-grid">
+
+            <a href="{% url 'secciones.personal' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-people"></i></div>
+                <h3 class="quick-title">Personal</h3>
+                <p class="quick-text">Gestión del personal</p>
+            </a>
+
+            <a href="{% url 'secciones.estudiantes' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-mortarboard"></i></div>
+                <h3 class="quick-title">Estudiantes</h3>
+                <p class="quick-text">Consulta de estudiantes</p>
+            </a>
+
+            <a href="{% url 'secciones.docentes' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-person-badge"></i></div>
+                <h3 class="quick-title">Docentes</h3>
+                <p class="quick-text">Información de docentes</p>
+            </a>
+
+            <a href="{% url 'secciones.oficinas' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-building"></i></div>
+                <h3 class="quick-title">Oficinas</h3>
+                <p class="quick-text">Dependencias administrativas</p>
+            </a>
+
+            <a href="{% url 'secciones.vigilantes' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-shield-check"></i></div>
+                <h3 class="quick-title">Vigilantes</h3>
+                <p class="quick-text">Control de vigilancia</p>
+            </a>
+
+            <a href="{% url 'secciones.enfermeria' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-heart-pulse"></i></div>
+                <h3 class="quick-title">Enfermería</h3>
+                <p class="quick-text">Servicios de salud</p>
+            </a>
+
+            <a href="{% url 'secciones.parqueadero' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-car-front"></i></div>
+                <h3 class="quick-title">Parqueadero</h3>
+                <p class="quick-text">Control vehicular</p>
+            </a>
+
+            <a href="{% url 'secciones.visitantes' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-person-plus"></i></div>
+                <h3 class="quick-title">Visitantes</h3>
+                <p class="quick-text">Registro de visitantes</p>
+            </a>
+
+            <a href="{% url 'secciones.acudientes' %}" class="quick-card">
+                <div class="quick-icon"><i class="bi bi-person-hearts"></i></div>
+                <h3 class="quick-title">Acudientes</h3>
+                <p class="quick-text">Información de acudientes</p>
+            </a>
+
+        </section>
+
+        <section class="panel-note">
+            <div class="panel-note-title">Gracias por usar nuestros sistemas</div>
+            <p>
+                Somos SIORTISOFT, una empresa dedicada a ofrecer soluciones tecnológicas para la gestión de instituciones educativas. 
+            </p>
+        </section>
+
+    </div>
+</div>
+{% endblock %}

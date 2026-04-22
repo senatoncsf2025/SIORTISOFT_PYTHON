@@ -1,0 +1,152 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block title %}Registro de usuario{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+{% endblock %}
+
+{% block main_class %}auth-page py-5{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="login-card">
+        <h1>Registro de usuario</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" name="nombre" maxlength="60" placeholder="Ingrese el nombre" value="{{ nombre|default:'' }}" required>
+                <div class="help-text">Solo letras y espacios. Máximo 60 caracteres.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="apellido">Apellido</label>
+                <input type="text" id="apellido" name="apellido" placeholder="Ingrese el apellido" value="{{ apellido|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="cedula">Cédula</label>
+                <input type="text" id="cedula" name="cedula" maxlength="14" placeholder="Ingrese la cédula" value="{{ cedula|default:'' }}" required>
+                <div class="help-text">Solo números. Mínimo 6 y máximo 14 dígitos.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" name="email" placeholder="Ingrese el correo" value="{{ email|default:'' }}" required>
+                <div class="help-text">Ejemplo: Gmail, Hotmail, Outlook, Yahoo.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" name="telefono" maxlength="10" placeholder="Ingrese el teléfono" value="{{ telefono|default:'' }}" required>
+                <div class="help-text">Debe tener 10 números y empezar por 3.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="direccion">Dirección</label>
+                <input type="text" id="direccion" name="direccion" placeholder="Ingrese la dirección" value="{{ direccion|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="genero">Género</label>
+                <select name="genero" id="genero">
+                    <option value="">Seleccione género</option>
+                    <option value="Masculino" {% if genero == 'Masculino' %}selected{% endif %}>Masculino</option>
+                    <option value="Femenino" {% if genero == 'Femenino' %}selected{% endif %}>Femenino</option>
+                    <option value="Otro" {% if genero == 'Otro' %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fecha_nacimiento">Fecha de nacimiento</label>
+                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ fecha_nacimiento|default:'' }}" required>
+                <div class="help-text">Solo se permite registro a mayores de 18 años.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="cargo">Cargo</label>
+                <input type="text" id="cargo" name="cargo" placeholder="Ingrese el cargo" value="{{ cargo|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="tipo_usuario">Tipo de usuario</label>
+                <select name="tipo_usuario" id="tipo_usuario" required>
+                    <option value="">Seleccione tipo de usuario</option>
+                    <option value="INTERNO" {% if tipo_usuario == 'INTERNO' %}selected{% endif %}>Interno</option>
+                    <option value="EXTERNO" {% if tipo_usuario == 'EXTERNO' %}selected{% endif %}>Externo</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="rol">Rol</label>
+                <select name="rol" id="rol" required>
+                    <option value="">Seleccione rol</option>
+                    <option value="admin" {% if rol == 'admin' %}selected{% endif %}>Administrador</option>
+                    <option value="vigilante" {% if rol == 'vigilante' %}selected{% endif %}>Vigilante</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="codigo-vigilante-wrapper" style="display: none;">
+                <label for="codigo_vigilante">Código del vigilante</label>
+                <input
+                    type="text"
+                    name="codigo_vigilante"
+                    id="codigo_vigilante"
+                    placeholder="Ingrese el código del vigilante"
+                    value="{{ codigo_vigilante|default:'' }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" placeholder="Ingrese la contraseña" required>
+                <div class="help-text">Mínimo 8 caracteres, con mayúscula, minúscula, número y caracter especial.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password2">Confirmar contraseña</label>
+                <input type="password" id="password2" name="password2" placeholder="Confirme la contraseña" required>
+            </div>
+
+            <button type="submit">Registrarme</button>
+        </form>
+
+        <div class="links">
+            <a href="{% url 'login' %}">Ya tengo cuenta</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const rolSelect = document.getElementById("rol");
+        const codigoWrapper = document.getElementById("codigo-vigilante-wrapper");
+        const codigoInput = document.getElementById("codigo_vigilante");
+
+        function toggleCodigoVigilante() {
+            if (rolSelect.value === "vigilante") {
+                codigoWrapper.style.display = "block";
+                codigoInput.required = true;
+            } else {
+                codigoWrapper.style.display = "none";
+                codigoInput.required = false;
+                codigoInput.value = "";
+            }
+        }
+
+        toggleCodigoVigilante();
+        rolSelect.addEventListener("change", toggleCodigoVigilante);
+    });
+</script>
+{% endblock %}

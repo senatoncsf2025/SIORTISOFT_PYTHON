@@ -1,0 +1,30 @@
+<div class="collapse {% if filtros_busqueda.buscar_nombre or filtros_busqueda.buscar_cedula %}show{% endif %}"
+     id="busquedaCollapse">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light">
+            <strong>Búsqueda rápida</strong>
+            <div class="small text-muted">Solo por nombre o documento para verificar si la persona existe.</div>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="buscar_nombre" class="form-control" value="{{ filtros_busqueda.buscar_nombre }}">
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label">Documento</label>
+                    <input type="text" name="buscar_cedula" class="form-control" value="{{ filtros_busqueda.buscar_cedula }}">
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                </div>
+
+                <div class="col-12">
+                    <a href="{% url index_url_name %}" class="btn btn-outline-secondary">Limpiar búsqueda</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
