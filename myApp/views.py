@@ -735,6 +735,21 @@ def obtener_config_columnas(request):
     }
 
 
+def obtener_secciones_estadistico(request):
+    return {
+        "mostrar_conteos_actuales": _checkbox_get(request, "mostrar_conteos_actuales", False),
+        "mostrar_horas_pico": _checkbox_get(request, "mostrar_horas_pico", False),
+        "mostrar_ingresos_por_dia": _checkbox_get(request, "mostrar_ingresos_por_dia", False),
+        "mostrar_salidas_por_dia": _checkbox_get(request, "mostrar_salidas_por_dia", False),
+        "mostrar_usuarios_frecuentes": _checkbox_get(request, "mostrar_usuarios_frecuentes", False),
+        "mostrar_usuarios_menos": _checkbox_get(request, "mostrar_usuarios_menos", False),
+        "mostrar_dentro": _checkbox_get(request, "mostrar_dentro", False),
+        "mostrar_distribucion_genero": _checkbox_get(request, "mostrar_distribucion_genero", False),
+        "mostrar_distribucion_tipo_usuario": _checkbox_get(request, "mostrar_distribucion_tipo_usuario", False),
+        "mostrar_ultimos_movimientos": _checkbox_get(request, "mostrar_ultimos_movimientos", False),
+    }
+
+
 def construir_datos_reporte(request, rol, base_qs=None):
     if base_qs is None:
         base_qs = get_role_queryset(rol)
@@ -881,10 +896,22 @@ def construir_datos_estadisticos(request, rol):
     if fecha_fin:
         movimientos_filtrados = movimientos_filtrados.filter(fecha__date__lte=fecha_fin)
 
-    movimientos_filtrados = movimientos_filtrados.select_related("usuario")
+    movimientos_filtrados = movimientos_filtrados.select_related("usuario", "registrado_por")
 
+    # IMPORTANTE:
+    # El total de movimientos por usuario frecuente/menos frecuente debe respetar el rango filtrado.
     subquery_total_movimientos = (
         Movimiento.objects.filter(usuario=OuterRef("pk"))
+        .filter(
+            fecha__date__gte=fecha_inicio if fecha_inicio else date(1900, 1, 1),
+        )
+    )
+
+    if fecha_fin:
+        subquery_total_movimientos = subquery_total_movimientos.filter(fecha__date__lte=fecha_fin)
+
+    subquery_total_movimientos = (
+        subquery_total_movimientos
         .values("usuario")
         .annotate(total=Count("id"))
         .values("total")[:1]
@@ -935,10 +962,13 @@ def construir_datos_estadisticos(request, rol):
 
     usuarios_sin_movimientos = usuarios_con_total.filter(total_movimientos=0).count()
 
-    ultimo_movimiento_usuario = (
-        Movimiento.objects.filter(usuario=OuterRef("pk"))
-        .order_by("-fecha")
-    )
+    ultimo_movimiento_usuario = Movimiento.objects.filter(usuario=OuterRef("pk"))
+    if fecha_inicio:
+        ultimo_movimiento_usuario = ultimo_movimiento_usuario.filter(fecha__date__gte=fecha_inicio)
+    if fecha_fin:
+        ultimo_movimiento_usuario = ultimo_movimiento_usuario.filter(fecha__date__lte=fecha_fin)
+
+    ultimo_movimiento_usuario = ultimo_movimiento_usuario.order_by("-fecha")
 
     dentro = usuarios.annotate(
         ultimo_tipo=Subquery(ultimo_movimiento_usuario.values("tipo")[:1]),
@@ -997,20 +1027,23 @@ def construir_datos_estadisticos(request, rol):
         .order_by("-total")
     )
 
+    # CORREGIDO: ahora sí respeta el rango de fechas
     ultimos_movimientos = (
-        movimientos_base.select_related("usuario", "registrado_por")
+        movimientos_filtrados.select_related("usuario", "registrado_por")
         .order_by("-fecha")[:10]
     )
 
-    estadistico_generado = bool(
-        fecha_inicio_txt or fecha_fin_txt or request.GET.get("generar_estadistico")
-    )
+    secciones_estadistico = obtener_secciones_estadistico(request)
+    estadistico_generado = bool(request.GET.get("generar_estadistico"))
 
     return {
         "fecha_inicio": fecha_inicio_txt,
         "fecha_fin": fecha_fin_txt,
+        "fecha_inicio_obj": fecha_inicio,
+        "fecha_fin_obj": fecha_fin,
         "error_fecha_estadistica": error_fecha_estadistica,
         "estadistico_generado": estadistico_generado,
+        "secciones_estadistico": secciones_estadistico,
 
         "total_usuarios": total_usuarios,
         "total_movimientos": total_movimientos,
@@ -1652,6 +1685,7 @@ def role_stats_pdf(request, rol):
         return redirect("index2")
 
     datos = construir_datos_estadisticos(request, rol)
+    secciones = datos["secciones_estadistico"]
 
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = f'inline; filename="reporte_estadistico_{rol}.pdf"'
@@ -1682,9 +1716,21 @@ def role_stats_pdf(request, rol):
     )
     elements.append(Spacer(1, 0.3 * cm))
 
+    # CORREGIDO: evita NoneType.strftime
+    fecha_inicio_label = (
+        datos["fecha_inicio_obj"].strftime("%Y-%m-%d")
+        if datos.get("fecha_inicio_obj")
+        else "Sin filtro"
+    )
+    fecha_fin_label = (
+        datos["fecha_fin_obj"].strftime("%Y-%m-%d")
+        if datos.get("fecha_fin_obj")
+        else "Sin filtro"
+    )
+
     periodo = [
-        ["Fecha inicio", datos["fecha_inicio"] or "Sin filtro"],
-        ["Fecha fin", datos["fecha_fin"] or "Sin filtro"],
+        ["Fecha inicio", fecha_inicio_label],
+        ["Fecha fin", fecha_fin_label],
     ]
     tabla_periodo = Table(periodo, colWidths=[5 * cm, 8 * cm])
     tabla_periodo.setStyle(
@@ -1701,6 +1747,15 @@ def role_stats_pdf(request, rol):
     )
     elements.append(tabla_periodo)
     elements.append(Spacer(1, 0.4 * cm))
+
+    if datos["error_fecha_estadistica"]:
+        elements.append(
+            Paragraph(
+                f"<b>Observación:</b> {datos['error_fecha_estadistica']}",
+                styles["Normal"],
+            )
+        )
+        elements.append(Spacer(1, 0.3 * cm))
 
     resumen = [
         ["Total usuarios", str(datos["total_usuarios"]), "Total movimientos", str(datos["total_movimientos"])],
@@ -1728,108 +1783,268 @@ def role_stats_pdf(request, rol):
     elements.append(tabla_resumen)
     elements.append(Spacer(1, 0.5 * cm))
 
-    elements.append(Paragraph("Horas pico", styles["Heading2"]))
-    horas_data = [["Hora", "Total movimientos"]]
-    for item in datos["horas_pico"]:
-        horas_data.append([f'{item["hora"]}:00', str(item["total"])])
-    if len(horas_data) == 1:
-        horas_data.append(["Sin datos", "0"])
-
-    tabla_horas = Table(horas_data, colWidths=[6 * cm, 6 * cm], repeatRows=1)
-    tabla_horas.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#334155")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("PADDING", (0, 0), (-1, -1), 5),
-            ]
+    if secciones["mostrar_conteos_actuales"]:
+        elements.append(Paragraph("Conteos actuales", styles["Heading2"]))
+        conteos_data = [
+            ["Hoy", str(datos["conteo_hoy"])],
+            ["Semana", str(datos["conteo_semana"])],
+            ["Mes", str(datos["conteo_mes"])],
+        ]
+        tabla_conteos = Table(conteos_data, colWidths=[6 * cm, 6 * cm])
+        tabla_conteos.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+                    ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#cbd5e1")),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
         )
-    )
-    elements.append(tabla_horas)
-    elements.append(Spacer(1, 0.4 * cm))
+        elements.append(tabla_conteos)
+        elements.append(Spacer(1, 0.4 * cm))
 
-    elements.append(Paragraph("Usuarios dentro actualmente", styles["Heading2"]))
-    dentro_data = [["Nombre", "Cédula", "Último movimiento"]]
-    for usuario in datos["dentro"]:
-        dentro_data.append([
-            usuario.nombre_completo,
-            usuario.cedula,
-            usuario.ultima_fecha.strftime("%Y-%m-%d %H:%M") if usuario.ultima_fecha else "-",
-        ])
-    if len(dentro_data) == 1:
-        dentro_data.append(["No hay personas dentro", "", ""])
+    if secciones["mostrar_horas_pico"]:
+        elements.append(Paragraph("Horas pico", styles["Heading2"]))
+        horas_data = [["Hora", "Total movimientos"]]
+        for item in datos["horas_pico"]:
+            hora_label = f'{item["hora"]}:00' if item["hora"] is not None else "Sin hora"
+            horas_data.append([hora_label, str(item["total"])])
+        if len(horas_data) == 1:
+            horas_data.append(["Sin datos", "0"])
 
-    tabla_dentro = Table(dentro_data, colWidths=[8 * cm, 5 * cm, 6 * cm], repeatRows=1)
-    tabla_dentro.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f766e")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("PADDING", (0, 0), (-1, -1), 5),
-            ]
+        tabla_horas = Table(horas_data, colWidths=[6 * cm, 6 * cm], repeatRows=1)
+        tabla_horas.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#334155")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
         )
-    )
-    elements.append(tabla_dentro)
-    elements.append(Spacer(1, 0.4 * cm))
+        elements.append(tabla_horas)
+        elements.append(Spacer(1, 0.4 * cm))
 
-    elements.append(Paragraph("Usuarios más frecuentes", styles["Heading2"]))
-    freq_data = [["Nombre", "Cédula", "Total movimientos"]]
-    for usuario in datos["usuarios_frecuentes"]:
-        freq_data.append([
-            usuario.nombre_completo,
-            usuario.cedula,
-            str(usuario.total_movimientos),
-        ])
-    if len(freq_data) == 1:
-        freq_data.append(["Sin datos", "", "0"])
+    if secciones["mostrar_ingresos_por_dia"]:
+        elements.append(Paragraph("Ingresos por día", styles["Heading2"]))
+        ingresos_data = [["Fecha", "Total"]]
+        for item in datos["ingresos_por_dia"]:
+            fecha_dia = item["dia"].strftime("%Y-%m-%d") if item["dia"] else "Sin fecha"
+            ingresos_data.append([fecha_dia, str(item["total"])])
+        if len(ingresos_data) == 1:
+            ingresos_data.append(["Sin datos", "0"])
 
-    tabla_freq = Table(freq_data, colWidths=[8 * cm, 5 * cm, 5 * cm], repeatRows=1)
-    tabla_freq.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1d4ed8")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("PADDING", (0, 0), (-1, -1), 5),
-            ]
+        tabla_ingresos = Table(ingresos_data, colWidths=[6 * cm, 6 * cm], repeatRows=1)
+        tabla_ingresos.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f766e")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
         )
-    )
-    elements.append(tabla_freq)
-    elements.append(Spacer(1, 0.4 * cm))
+        elements.append(tabla_ingresos)
+        elements.append(Spacer(1, 0.4 * cm))
 
-    elements.append(Paragraph("Usuarios menos frecuentes", styles["Heading2"]))
-    menos_data = [["Nombre", "Cédula", "Total movimientos"]]
-    for usuario in datos["usuarios_menos"]:
-        menos_data.append([
-            usuario.nombre_completo,
-            usuario.cedula,
-            str(usuario.total_movimientos),
-        ])
-    if len(menos_data) == 1:
-        menos_data.append(["Sin datos", "", "0"])
+    if secciones["mostrar_salidas_por_dia"]:
+        elements.append(Paragraph("Salidas por día", styles["Heading2"]))
+        salidas_data = [["Fecha", "Total"]]
+        for item in datos["salidas_por_dia"]:
+            fecha_dia = item["dia"].strftime("%Y-%m-%d") if item["dia"] else "Sin fecha"
+            salidas_data.append([fecha_dia, str(item["total"])])
+        if len(salidas_data) == 1:
+            salidas_data.append(["Sin datos", "0"])
 
-    tabla_menos = Table(menos_data, colWidths=[8 * cm, 5 * cm, 5 * cm], repeatRows=1)
-    tabla_menos.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#7c3aed")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("PADDING", (0, 0), (-1, -1), 5),
-            ]
+        tabla_salidas = Table(salidas_data, colWidths=[6 * cm, 6 * cm], repeatRows=1)
+        tabla_salidas.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#92400e")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
         )
-    )
-    elements.append(tabla_menos)
+        elements.append(tabla_salidas)
+        elements.append(Spacer(1, 0.4 * cm))
+
+    if secciones["mostrar_dentro"]:
+        elements.append(Paragraph("Usuarios dentro actualmente", styles["Heading2"]))
+        dentro_data = [["Nombre", "Cédula", "Último movimiento"]]
+        for usuario in datos["dentro"]:
+            dentro_data.append([
+                usuario.nombre_completo,
+                usuario.cedula,
+                usuario.ultima_fecha.strftime("%Y-%m-%d %H:%M") if usuario.ultima_fecha else "-",
+            ])
+        if len(dentro_data) == 1:
+            dentro_data.append(["No hay personas dentro", "", ""])
+
+        tabla_dentro = Table(dentro_data, colWidths=[8 * cm, 5 * cm, 6 * cm], repeatRows=1)
+        tabla_dentro.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f766e")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        elements.append(tabla_dentro)
+        elements.append(Spacer(1, 0.4 * cm))
+
+    if secciones["mostrar_usuarios_frecuentes"]:
+        elements.append(Paragraph("Usuarios más frecuentes", styles["Heading2"]))
+        freq_data = [["Nombre", "Cédula", "Total movimientos"]]
+        for usuario in datos["usuarios_frecuentes"]:
+            freq_data.append([
+                usuario.nombre_completo,
+                usuario.cedula,
+                str(usuario.total_movimientos),
+            ])
+        if len(freq_data) == 1:
+            freq_data.append(["Sin datos", "", "0"])
+
+        tabla_freq = Table(freq_data, colWidths=[8 * cm, 5 * cm, 5 * cm], repeatRows=1)
+        tabla_freq.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1d4ed8")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        elements.append(tabla_freq)
+        elements.append(Spacer(1, 0.4 * cm))
+
+    if secciones["mostrar_usuarios_menos"]:
+        elements.append(Paragraph("Usuarios menos frecuentes", styles["Heading2"]))
+        menos_data = [["Nombre", "Cédula", "Total movimientos"]]
+        for usuario in datos["usuarios_menos"]:
+            menos_data.append([
+                usuario.nombre_completo,
+                usuario.cedula,
+                str(usuario.total_movimientos),
+            ])
+        if len(menos_data) == 1:
+            menos_data.append(["Sin datos", "", "0"])
+
+        tabla_menos = Table(menos_data, colWidths=[8 * cm, 5 * cm, 5 * cm], repeatRows=1)
+        tabla_menos.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#7c3aed")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        elements.append(tabla_menos)
+        elements.append(Spacer(1, 0.4 * cm))
+
+    if secciones["mostrar_distribucion_genero"]:
+        elements.append(Paragraph("Distribución por género", styles["Heading2"]))
+        genero_data = [["Género", "Total"]]
+        for item in datos["distribucion_genero"]:
+            genero_data.append([item["genero"] or "Sin definir", str(item["total"])])
+        if len(genero_data) == 1:
+            genero_data.append(["Sin datos", "0"])
+
+        tabla_genero = Table(genero_data, colWidths=[8 * cm, 5 * cm], repeatRows=1)
+        tabla_genero.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#475569")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        elements.append(tabla_genero)
+        elements.append(Spacer(1, 0.4 * cm))
+
+    if secciones["mostrar_distribucion_tipo_usuario"]:
+        elements.append(Paragraph("Distribución por tipo de usuario", styles["Heading2"]))
+        tipo_data = [["Tipo usuario", "Total"]]
+        for item in datos["distribucion_tipo_usuario"]:
+            tipo_data.append([item["tipo_usuario"] or "Sin definir", str(item["total"])])
+        if len(tipo_data) == 1:
+            tipo_data.append(["Sin datos", "0"])
+
+        tabla_tipo = Table(tipo_data, colWidths=[8 * cm, 5 * cm], repeatRows=1)
+        tabla_tipo.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#334155")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        elements.append(tabla_tipo)
+        elements.append(Spacer(1, 0.4 * cm))
+
+    if secciones["mostrar_ultimos_movimientos"]:
+        elements.append(Paragraph("Últimos movimientos", styles["Heading2"]))
+        ultimos_data = [["Fecha", "Usuario", "Cédula", "Tipo", "Registrado por"]]
+        for m in datos["ultimos_movimientos"]:
+            ultimos_data.append([
+                m.fecha.strftime("%Y-%m-%d %H:%M") if m.fecha else "-",
+                m.usuario.nombre_completo if m.usuario else "-",
+                m.usuario.cedula if m.usuario else "-",
+                m.tipo.capitalize() if m.tipo else "-",
+                m.registrado_por.nombre_completo if m.registrado_por else "-",
+            ])
+        if len(ultimos_data) == 1:
+            ultimos_data.append(["Sin datos", "", "", "", ""])
+
+        tabla_ultimos = Table(
+            ultimos_data,
+            colWidths=[4 * cm, 6 * cm, 4 * cm, 3 * cm, 6 * cm],
+            repeatRows=1,
+        )
+        tabla_ultimos.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        elements.append(tabla_ultimos)
 
     doc.build(elements)
     return response

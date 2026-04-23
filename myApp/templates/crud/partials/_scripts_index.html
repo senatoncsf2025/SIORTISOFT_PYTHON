@@ -78,31 +78,86 @@ function toggleColumn(columnClass, visible) {
     });
 }
 
+function showSection(sectionToShow, sectionToHide = null) {
+    if (sectionToHide) {
+        sectionToHide.classList.add('d-none');
+    }
+
+    if (sectionToShow) {
+        sectionToShow.classList.remove('d-none');
+
+        setTimeout(() => {
+            sectionToShow.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, 50);
+    }
+}
+
+function hideSection(section) {
+    if (section) {
+        section.classList.add('d-none');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.toggle-estado').forEach(button => {
         button.addEventListener('click', toggleEstadoHandler);
     });
 
+    // =========================
+    // REPORTE NORMAL
+    // =========================
     const generarReporteBtn = document.getElementById('generarReporteBtn');
     const cerrarReporteBtn = document.getElementById('cerrarReporteBtn');
     const reporteSection = document.getElementById('reporteSection');
-    const camposReporte = document.querySelectorAll('.reporte-campo');
-    const exportarPdfBtn = document.getElementById('exportarPdfBtn');
     const reporteForm = document.getElementById('reporteForm');
+    const exportarPdfBtn = document.getElementById('exportarPdfBtn');
+    const camposReporte = document.querySelectorAll('.reporte-campo');
 
+    // =========================
+    // ESTADISTICO
+    // =========================
+    const generarEstadisticoBtn = document.getElementById('generarEstadisticoBtn');
+    const cerrarEstadisticoBtn = document.getElementById('cerrarEstadisticoBtn');
+    const estadisticoSection = document.getElementById('estadisticoSection');
+    const estadisticoForm = document.getElementById('estadisticoForm');
+    const exportarEstadisticoPdfBtn = document.getElementById('exportarEstadisticoPdfBtn');
+
+    // =========================
+    // ABRIR / CERRAR REPORTE
+    // =========================
     if (generarReporteBtn && reporteSection) {
         generarReporteBtn.addEventListener('click', function () {
-            reporteSection.classList.remove('d-none');
-            reporteSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            showSection(reporteSection, estadisticoSection);
         });
     }
 
     if (cerrarReporteBtn && reporteSection) {
         cerrarReporteBtn.addEventListener('click', function () {
-            reporteSection.classList.add('d-none');
+            hideSection(reporteSection);
         });
     }
 
+    // =========================
+    // ABRIR / CERRAR ESTADISTICO
+    // =========================
+    if (generarEstadisticoBtn && estadisticoSection) {
+        generarEstadisticoBtn.addEventListener('click', function () {
+            showSection(estadisticoSection, reporteSection);
+        });
+    }
+
+    if (cerrarEstadisticoBtn && estadisticoSection) {
+        cerrarEstadisticoBtn.addEventListener('click', function () {
+            hideSection(estadisticoSection);
+        });
+    }
+
+    // =========================
+    // COLUMNAS DEL REPORTE
+    // =========================
     camposReporte.forEach(campo => {
         toggleColumn(campo.dataset.col, campo.checked);
 
@@ -111,6 +166,20 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // =========================
+    // SI ENVÍAN FORMULARIO REPORTE, QUE QUEDE ABIERTO
+    // =========================
+    if (reporteForm) {
+        reporteForm.addEventListener('submit', function () {
+            if (reporteSection) {
+                reporteSection.classList.remove('d-none');
+            }
+        });
+    }
+
+    // =========================
+    // EXPORTAR PDF REPORTE
+    // =========================
     if (exportarPdfBtn && reporteForm) {
         exportarPdfBtn.addEventListener('click', function () {
             const pdfUrl = this.dataset.pdfUrl;
@@ -132,25 +201,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const generarEstadisticoBtn = document.getElementById('generarEstadisticoBtn');
-    const cerrarEstadisticoBtn = document.getElementById('cerrarEstadisticoBtn');
-    const estadisticoSection = document.getElementById('estadisticoSection');
-    const estadisticoForm = document.getElementById('estadisticoForm');
-    const exportarEstadisticoPdfBtn = document.getElementById('exportarEstadisticoPdfBtn');
-
-    if (generarEstadisticoBtn && estadisticoSection) {
-        generarEstadisticoBtn.addEventListener('click', function () {
-            estadisticoSection.classList.remove('d-none');
-            estadisticoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    }
-
-    if (cerrarEstadisticoBtn && estadisticoSection) {
-        cerrarEstadisticoBtn.addEventListener('click', function () {
-            estadisticoSection.classList.add('d-none');
-        });
-    }
-
+    // =========================
+    // SI ENVÍAN FORMULARIO ESTADISTICO, QUE QUEDE ABIERTO
+    // =========================
     if (estadisticoForm) {
         estadisticoForm.addEventListener('submit', function () {
             if (estadisticoSection) {
@@ -159,6 +212,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // =========================
+    // EXPORTAR PDF ESTADISTICO
+    // =========================
     if (exportarEstadisticoPdfBtn && estadisticoForm) {
         exportarEstadisticoPdfBtn.addEventListener('click', function () {
             const pdfUrl = this.dataset.pdfUrl;
@@ -166,8 +222,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const params = new URLSearchParams();
 
             for (const [key, value] of formData.entries()) {
+                if (key.startsWith('mostrar_')) {
+                    continue;
+                }
                 params.append(key, value);
             }
+
+            document.querySelectorAll('.estadistico-campo').forEach(campo => {
+                params.set(campo.name, campo.checked ? '1' : '0');
+            });
 
             params.set('generar_estadistico', '1');
 

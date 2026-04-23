@@ -10,17 +10,19 @@
             <h1 class="mb-1">Gestión de {{ rol_titulo }}</h1>
             <p class="text-muted mb-0">Administra registros, búsquedas y reportes.</p>
         </div>
+
         <div class="d-flex gap-2 flex-wrap">
             <a href="{% url create_url_name %}" class="btn btn-success">
                 + Nuevo {{ rol_singular|capfirst }}
             </a>
 
-            <button class="btn btn-outline-primary"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#busquedaCollapse"
-                    aria-expanded="{% if filtros_busqueda.buscar_nombre or filtros_busqueda.buscar_cedula %}true{% else %}false{% endif %}"
-                    aria-controls="busquedaCollapse">
+            <button
+                class="btn btn-outline-primary"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#busquedaCollapse"
+                aria-expanded="{% if filtros_busqueda.buscar_nombre or filtros_busqueda.buscar_cedula %}true{% else %}false{% endif %}"
+                aria-controls="busquedaCollapse">
                 🔎 Buscar persona
             </button>
 
@@ -37,9 +39,9 @@
     <div id="alert-container"></div>
 
     {% if error_fecha_reporte %}
-    <div class="alert alert-warning">
-        {{ error_fecha_reporte }}
-    </div>
+        <div class="alert alert-warning">
+            {{ error_fecha_reporte }}
+        </div>
     {% endif %}
 
     {% include "crud/partials/_busqueda_rapida.html" %}
@@ -48,7 +50,7 @@
     {% include "crud/partials/_estadisticos.html" %}
 </div>
 
-<form id="csrf-form" style="display:none;">
+<form id="csrf-form" style="display: none;">
     {% csrf_token %}
 </form>
 {% endblock %}
