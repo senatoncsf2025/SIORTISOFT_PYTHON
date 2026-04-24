@@ -2,6 +2,7 @@ import csv
 import io
 import re
 from datetime import date, datetime
+from django.conf import settings
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -119,6 +120,7 @@ def get_role_urls(rol):
         "inactivar_url_name": f"{rol}.inactivar",
         "reporte_pdf_url_name": f"{rol}.reporte_pdf",
         "estadistico_pdf_url_name": f"{rol}.estadistico_pdf",
+        "correo_url_name": f"{rol}.enviar_correo",
     }
 
 
@@ -2425,63 +2427,54 @@ def carga_masiva_view(request):
 # =========================
 # Correo masivos
 # =========================
+@login_required
+@require_POST
 def enviar_correo(request, tipo):
+    if request.user.rol != "admin":
+        return JsonResponse({
+            "success": False,
+            "message": "No autorizado"
+        }, status=403)
 
     if tipo not in ROLES_VALIDOS:
         return JsonResponse({
-            'success': False,
-            'message': 'Rol no válido'
-        })
+            "success": False,
+            "message": "Rol no válido"
+        }, status=400)
 
-    modelo = MODELO_ROL_MAP.get(tipo)
-
-    if not modelo:
-        return JsonResponse({
-            'success': False,
-            'message': 'No hay modelo asociado a este rol'
-        })
-
-    if request.method != 'POST':
-        return JsonResponse({
-            'success': False,
-            'message': 'Método no permitido'
-        })
-
-    asunto = request.POST.get('asunto')
-    mensaje = request.POST.get('mensaje')
+    asunto = request.POST.get("asunto", "").strip()
+    mensaje = request.POST.get("mensaje", "").strip()
 
     if not asunto or not mensaje:
         return JsonResponse({
-            'success': False,
-            'message': 'Debes completar asunto y mensaje'
-        })
+            "success": False,
+            "message": "Debes completar asunto y mensaje"
+        }, status=400)
 
-    # 🔥 FILTRAR POR TIPO DE USUARIO (CLAVE EN TU SISTEMA)
-    if modelo == Usuario:
-        usuarios = modelo.objects.filter(tipo_usuario=tipo)
-    else:
-        usuarios = modelo.objects.all()
+    usuarios = Usuario.objects.filter(
+        subrol=tipo,
+        activo=True
+    ).exclude(email__isnull=True).exclude(email="")
 
     mensajes = []
 
     for u in usuarios:
-        if hasattr(u, 'correo') and u.correo:
-            mensajes.append((
-                asunto,
-                f"Hola {getattr(u, 'nombre', 'usuario')}\n\n{mensaje}",
-                'tucorreo@gmail.com',
-                [u.correo]
-            ))
+        mensajes.append((
+            asunto,
+            f"Hola {u.nombre}\n\n{mensaje}",
+            settings.DEFAULT_FROM_EMAIL,
+            [u.email]
+        ))
 
     if not mensajes:
         return JsonResponse({
-            'success': False,
-            'message': 'No hay correos válidos'
+            "success": False,
+            "message": "No hay correos válidos"
         })
 
     send_mass_mail(mensajes, fail_silently=False)
 
     return JsonResponse({
-        'success': True,
-        'message': f'Se enviaron {len(mensajes)} correos 🚀'
+        "success": True,
+        "message": f"Se enviaron {len(mensajes)} correos"
     })

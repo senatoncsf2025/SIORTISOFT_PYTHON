@@ -20,32 +20,26 @@ urlpatterns = [
     # ADMIN DJANGO
     # =========================
     path("admin/", admin.site.urls),
-
     # =========================
     # PÁGINAS PÚBLICAS
     # =========================
     path("", views.index, name="home"),
     path("index/", views.index, name="index"),
     path("registro-visita/", views.registro_visita_view, name="registro_visita"),
-
     # =========================
     # PANELES
     # =========================
     path("index2/", views.index2, name="index2"),
     path("dashboard/", views.dashboard_view, name="dashboard"),
-
     # API DATOS DASHBOARD
     path("dashboard-data/", views.dashboard_data, name="dashboard_data"),
-
     # =========================
     # AUTENTICACIÓN
     # =========================
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
-
     # Registro interno
     path("register/", views.register_view, name="register"),
-
     # =========================
     # CARGA MASIVA
     # =========================
@@ -63,7 +57,6 @@ for rol in ROLES:
             {"rol": rol},
             name=f"secciones.{rol}",
         ),
-
         # =========================
         # CRUD ADMIN
         # =========================
@@ -98,11 +91,11 @@ for rol in ROLES:
             name=f"{rol}.inactivar",
         ),
         path(
-            f"crud/{rol}/correo/<str:tipo>/",
+            f"crud/{rol}/correo/",
             views.enviar_correo,
-            name=f"{rol}enviar_correo",
+            {"tipo": rol},
+            name=f"{rol}.enviar_correo",
         ),
-
         # =========================
         # REPORTE PDF NORMAL
         # =========================
@@ -112,7 +105,6 @@ for rol in ROLES:
             {"rol": rol},
             name=f"{rol}.reporte_pdf",
         ),
-
         # =========================
         # REPORTE PDF ESTADÍSTICO
         # =========================

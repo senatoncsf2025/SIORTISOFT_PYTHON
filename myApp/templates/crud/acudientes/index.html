@@ -33,6 +33,7 @@
             <button id="generarEstadisticoBtn" type="button" class="btn btn-dark">
                 📊 Reportes estadísticos
             </button>
+
             <button id="generarCorreoBtn" type="button" class="btn btn-warning">
                 📧 Correos masivos
             </button>
@@ -51,6 +52,39 @@
     {% include "crud/partials/_tabla_principal.html" %}
     {% include "crud/partials/_reporte.html" %}
     {% include "crud/partials/_estadisticos.html" %}
+
+    <div id="correoSection" class="d-none mt-4">
+        <div class="card shadow">
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between mb-3">
+                    <h5>Enviar correos masivos</h5>
+                    <button id="cerrarCorreoBtn" type="button" class="btn btn-danger btn-sm">
+                        X
+                    </button>
+                </div>
+
+                <form id="correoForm" method="post" action="{% url correo_url_name %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Asunto:</label>
+                        <input type="text" name="asunto" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mensaje:</label>
+                        <textarea name="mensaje" class="form-control" rows="4" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Enviar correos
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
 </div>
 
 <form id="csrf-form" style="display: none;">

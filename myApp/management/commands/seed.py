@@ -16,7 +16,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("✅ Seeder ejecutado correctamente"))
 
     def crear_admin(self):
-        email = "admin@admin.com"
+        email = "elkingustavo15@gmail.com"
 
         if Usuario.objects.filter(email=email).exists():
             self.stdout.write("ℹ️ Admin ya existe")
@@ -43,11 +43,11 @@ class Command(BaseCommand):
         admin.save()
 
         self.stdout.write(self.style.SUCCESS("✅ Admin creado"))
-        self.stdout.write("   Email: admin@admin.com")
+        self.stdout.write("   Email: elkingustavo15@gmail.com")
         self.stdout.write("   Password: Admin123*")
 
     def crear_vigilante(self):
-        email = "vigilante@demo.com"
+        email = "sebasarez123@gmail.com"
 
         if Usuario.objects.filter(email=email).exists():
             self.stdout.write("ℹ️ Vigilante ya existe")
@@ -72,5 +72,5 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS("✅ Vigilante creado"))
-        self.stdout.write("   Email: vigilante@demo.com")
+        self.stdout.write("   Email: sebasarez123@gmail.com")
         self.stdout.write("   Password: Vigilante123*")
