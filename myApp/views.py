@@ -22,7 +22,9 @@ from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from .models import Computador, Movimiento, Usuario, Vehiculo
-
+from django.core.mail import send_mass_mail
+from django.http import HttpResponse
+from django.shortcuts import render
 
 # =========================================================
 # CONSTANTES
@@ -2418,3 +2420,68 @@ def carga_masiva_view(request):
             return render(request, "carga_masiva.html")
 
     return render(request, "carga_masiva.html")
+ 
+ 
+# =========================
+# Correo masivos
+# =========================
+def enviar_correo(request, tipo):
+
+    if tipo not in ROLES_VALIDOS:
+        return JsonResponse({
+            'success': False,
+            'message': 'Rol no válido'
+        })
+
+    modelo = MODELO_ROL_MAP.get(tipo)
+
+    if not modelo:
+        return JsonResponse({
+            'success': False,
+            'message': 'No hay modelo asociado a este rol'
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'message': 'Método no permitido'
+        })
+
+    asunto = request.POST.get('asunto')
+    mensaje = request.POST.get('mensaje')
+
+    if not asunto or not mensaje:
+        return JsonResponse({
+            'success': False,
+            'message': 'Debes completar asunto y mensaje'
+        })
+
+    # 🔥 FILTRAR POR TIPO DE USUARIO (CLAVE EN TU SISTEMA)
+    if modelo == Usuario:
+        usuarios = modelo.objects.filter(tipo_usuario=tipo)
+    else:
+        usuarios = modelo.objects.all()
+
+    mensajes = []
+
+    for u in usuarios:
+        if hasattr(u, 'correo') and u.correo:
+            mensajes.append((
+                asunto,
+                f"Hola {getattr(u, 'nombre', 'usuario')}\n\n{mensaje}",
+                'tucorreo@gmail.com',
+                [u.correo]
+            ))
+
+    if not mensajes:
+        return JsonResponse({
+            'success': False,
+            'message': 'No hay correos válidos'
+        })
+
+    send_mass_mail(mensajes, fail_silently=False)
+
+    return JsonResponse({
+        'success': True,
+        'message': f'Se enviaron {len(mensajes)} correos 🚀'
+    })

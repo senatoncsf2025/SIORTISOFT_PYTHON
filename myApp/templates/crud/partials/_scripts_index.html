@@ -1,43 +1,43 @@
 <script>
-function toggleEstadoHandler(event) {
-    const button = event.currentTarget;
-    const url = button.dataset.url;
-    const action = button.dataset.action;
-    const editUrl = button.dataset.editUrl;
-    const row = button.closest('tr');
-    const estadoCell = row.querySelector('.estado');
-    const accionesCell = row.querySelector('.acciones');
+    function toggleEstadoHandler(event) {
+        const button = event.currentTarget;
+        const url = button.dataset.url;
+        const action = button.dataset.action;
+        const editUrl = button.dataset.editUrl;
+        const row = button.closest('tr');
+        const estadoCell = row.querySelector('.estado');
+        const accionesCell = row.querySelector('.acciones');
 
-    if (!confirm(`¿Seguro que deseas ${action} este registro?`)) return;
+        if (!confirm(`¿Seguro que deseas ${action} este registro?`)) return;
 
-    const tokenInput = document.querySelector('#csrf-form [name=csrfmiddlewaretoken]');
-    const token = tokenInput ? tokenInput.value : '';
+        const tokenInput = document.querySelector('#csrf-form [name=csrfmiddlewaretoken]');
+        const token = tokenInput ? tokenInput.value : '';
 
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': token,
-            'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (!data.success) {
-            throw new Error(data.message || 'No se pudo procesar la solicitud');
-        }
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': token,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.message || 'No se pudo procesar la solicitud');
+                }
 
-        document.getElementById('alert-container').innerHTML = `
+                document.getElementById('alert-container').innerHTML = `
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 ${data.message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
 
-        if (data.activo) {
-            estadoCell.innerHTML = '<span class="badge bg-success">Activo</span>';
-            accionesCell.innerHTML = `
+                if (data.activo) {
+                    estadoCell.innerHTML = '<span class="badge bg-success">Activo</span>';
+                    accionesCell.innerHTML = `
                 <a href="${editUrl}" class="btn btn-warning btn-sm">Editar</a>
                 <button
                     type="button"
@@ -48,9 +48,9 @@ function toggleEstadoHandler(event) {
                     Inactivar
                 </button>
             `;
-        } else {
-            estadoCell.innerHTML = '<span class="badge bg-secondary">Inactivo</span>';
-            accionesCell.innerHTML = `
+                } else {
+                    estadoCell.innerHTML = '<span class="badge bg-secondary">Inactivo</span>';
+                    accionesCell.innerHTML = `
                 <a href="${editUrl}" class="btn btn-warning btn-sm">Editar</a>
                 <button
                     type="button"
@@ -61,181 +61,201 @@ function toggleEstadoHandler(event) {
                     Activar
                 </button>
             `;
+                }
+
+                accionesCell.querySelectorAll('.toggle-estado').forEach(btn => {
+                    btn.addEventListener('click', toggleEstadoHandler);
+                });
+            })
+            .catch(error => {
+                alert(error.message || 'Error al procesar la solicitud');
+            });
+    }
+
+    function toggleColumn(columnClass, visible) {
+        document.querySelectorAll('.' + columnClass).forEach(el => {
+            el.classList.toggle('d-none', !visible);
+        });
+    }
+
+    function showSection(sectionToShow, sectionToHide = null) {
+        if (sectionToHide) {
+            sectionToHide.classList.add('d-none');
         }
 
-        accionesCell.querySelectorAll('.toggle-estado').forEach(btn => {
-            btn.addEventListener('click', toggleEstadoHandler);
-        });
-    })
-    .catch(error => {
-        alert(error.message || 'Error al procesar la solicitud');
-    });
-}
+        if (sectionToShow) {
+            sectionToShow.classList.remove('d-none');
 
-function toggleColumn(columnClass, visible) {
-    document.querySelectorAll('.' + columnClass).forEach(el => {
-        el.classList.toggle('d-none', !visible);
-    });
-}
-
-function showSection(sectionToShow, sectionToHide = null) {
-    if (sectionToHide) {
-        sectionToHide.classList.add('d-none');
+            setTimeout(() => {
+                sectionToShow.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 50);
+        }
     }
 
-    if (sectionToShow) {
-        sectionToShow.classList.remove('d-none');
+    function hideSection(section) {
+        if (section) {
+            section.classList.add('d-none');
+        }
+    }
 
-        setTimeout(() => {
-            sectionToShow.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.toggle-estado').forEach(button => {
+            button.addEventListener('click', toggleEstadoHandler);
+        });
+
+        // =========================
+        // REPORTE NORMAL
+        // =========================
+        const generarReporteBtn = document.getElementById('generarReporteBtn');
+        const cerrarReporteBtn = document.getElementById('cerrarReporteBtn');
+        const reporteSection = document.getElementById('reporteSection');
+        const reporteForm = document.getElementById('reporteForm');
+        const exportarPdfBtn = document.getElementById('exportarPdfBtn');
+        const camposReporte = document.querySelectorAll('.reporte-campo');
+
+        // =========================
+        // ESTADISTICO
+        // =========================
+        const generarEstadisticoBtn = document.getElementById('generarEstadisticoBtn');
+        const cerrarEstadisticoBtn = document.getElementById('cerrarEstadisticoBtn');
+        const estadisticoSection = document.getElementById('estadisticoSection');
+        const estadisticoForm = document.getElementById('estadisticoForm');
+        const exportarEstadisticoPdfBtn = document.getElementById('exportarEstadisticoPdfBtn');
+
+        // =========================
+        // ABRIR / CERRAR REPORTE
+        // =========================
+        if (generarReporteBtn && reporteSection) {
+            generarReporteBtn.addEventListener('click', function () {
+                showSection(reporteSection, estadisticoSection);
             });
-        }, 50);
-    }
-}
+        }
 
-function hideSection(section) {
-    if (section) {
-        section.classList.add('d-none');
-    }
-}
+        if (cerrarReporteBtn && reporteSection) {
+            cerrarReporteBtn.addEventListener('click', function () {
+                hideSection(reporteSection);
+            });
+        }
 
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.toggle-estado').forEach(button => {
-        button.addEventListener('click', toggleEstadoHandler);
-    });
+        // =========================
+        // ABRIR / CERRAR ESTADISTICO
+        // =========================
+        if (generarEstadisticoBtn && estadisticoSection) {
+            generarEstadisticoBtn.addEventListener('click', function () {
+                showSection(estadisticoSection, reporteSection);
+            });
+        }
 
-    // =========================
-    // REPORTE NORMAL
-    // =========================
-    const generarReporteBtn = document.getElementById('generarReporteBtn');
-    const cerrarReporteBtn = document.getElementById('cerrarReporteBtn');
-    const reporteSection = document.getElementById('reporteSection');
-    const reporteForm = document.getElementById('reporteForm');
-    const exportarPdfBtn = document.getElementById('exportarPdfBtn');
-    const camposReporte = document.querySelectorAll('.reporte-campo');
+        if (cerrarEstadisticoBtn && estadisticoSection) {
+            cerrarEstadisticoBtn.addEventListener('click', function () {
+                hideSection(estadisticoSection);
+            });
+        }
 
-    // =========================
-    // ESTADISTICO
-    // =========================
-    const generarEstadisticoBtn = document.getElementById('generarEstadisticoBtn');
-    const cerrarEstadisticoBtn = document.getElementById('cerrarEstadisticoBtn');
-    const estadisticoSection = document.getElementById('estadisticoSection');
-    const estadisticoForm = document.getElementById('estadisticoForm');
-    const exportarEstadisticoPdfBtn = document.getElementById('exportarEstadisticoPdfBtn');
+        // =========================
+        // COLUMNAS DEL REPORTE
+        // =========================
+        camposReporte.forEach(campo => {
+            toggleColumn(campo.dataset.col, campo.checked);
 
-    // =========================
-    // ABRIR / CERRAR REPORTE
-    // =========================
-    if (generarReporteBtn && reporteSection) {
-        generarReporteBtn.addEventListener('click', function () {
-            showSection(reporteSection, estadisticoSection);
+            campo.addEventListener('change', function () {
+                toggleColumn(this.dataset.col, this.checked);
+            });
         });
-    }
 
-    if (cerrarReporteBtn && reporteSection) {
-        cerrarReporteBtn.addEventListener('click', function () {
-            hideSection(reporteSection);
-        });
-    }
-
-    // =========================
-    // ABRIR / CERRAR ESTADISTICO
-    // =========================
-    if (generarEstadisticoBtn && estadisticoSection) {
-        generarEstadisticoBtn.addEventListener('click', function () {
-            showSection(estadisticoSection, reporteSection);
-        });
-    }
-
-    if (cerrarEstadisticoBtn && estadisticoSection) {
-        cerrarEstadisticoBtn.addEventListener('click', function () {
-            hideSection(estadisticoSection);
-        });
-    }
-
-    // =========================
-    // COLUMNAS DEL REPORTE
-    // =========================
-    camposReporte.forEach(campo => {
-        toggleColumn(campo.dataset.col, campo.checked);
-
-        campo.addEventListener('change', function () {
-            toggleColumn(this.dataset.col, this.checked);
-        });
-    });
-
-    // =========================
-    // SI ENVÍAN FORMULARIO REPORTE, QUE QUEDE ABIERTO
-    // =========================
-    if (reporteForm) {
-        reporteForm.addEventListener('submit', function () {
-            if (reporteSection) {
-                reporteSection.classList.remove('d-none');
-            }
-        });
-    }
-
-    // =========================
-    // EXPORTAR PDF REPORTE
-    // =========================
-    if (exportarPdfBtn && reporteForm) {
-        exportarPdfBtn.addEventListener('click', function () {
-            const pdfUrl = this.dataset.pdfUrl;
-            const formData = new FormData(reporteForm);
-            const params = new URLSearchParams();
-
-            for (const [key, value] of formData.entries()) {
-                if (key.startsWith('mostrar_')) {
-                    continue;
+        // =========================
+        // SI ENVÍAN FORMULARIO REPORTE, QUE QUEDE ABIERTO
+        // =========================
+        if (reporteForm) {
+            reporteForm.addEventListener('submit', function () {
+                if (reporteSection) {
+                    reporteSection.classList.remove('d-none');
                 }
-                params.append(key, value);
-            }
-
-            document.querySelectorAll('.reporte-campo').forEach(campo => {
-                params.set(campo.name, campo.checked ? '1' : '0');
             });
+        }
 
-            window.open(`${pdfUrl}?${params.toString()}`, '_blank');
-        });
-    }
+        // =========================
+        // EXPORTAR PDF REPORTE
+        // =========================
+        if (exportarPdfBtn && reporteForm) {
+            exportarPdfBtn.addEventListener('click', function () {
+                const pdfUrl = this.dataset.pdfUrl;
+                const formData = new FormData(reporteForm);
+                const params = new URLSearchParams();
 
-    // =========================
-    // SI ENVÍAN FORMULARIO ESTADISTICO, QUE QUEDE ABIERTO
-    // =========================
-    if (estadisticoForm) {
-        estadisticoForm.addEventListener('submit', function () {
-            if (estadisticoSection) {
-                estadisticoSection.classList.remove('d-none');
-            }
-        });
-    }
-
-    // =========================
-    // EXPORTAR PDF ESTADISTICO
-    // =========================
-    if (exportarEstadisticoPdfBtn && estadisticoForm) {
-        exportarEstadisticoPdfBtn.addEventListener('click', function () {
-            const pdfUrl = this.dataset.pdfUrl;
-            const formData = new FormData(estadisticoForm);
-            const params = new URLSearchParams();
-
-            for (const [key, value] of formData.entries()) {
-                if (key.startsWith('mostrar_')) {
-                    continue;
+                for (const [key, value] of formData.entries()) {
+                    if (key.startsWith('mostrar_')) {
+                        continue;
+                    }
+                    params.append(key, value);
                 }
-                params.append(key, value);
-            }
 
-            document.querySelectorAll('.estadistico-campo').forEach(campo => {
-                params.set(campo.name, campo.checked ? '1' : '0');
+                document.querySelectorAll('.reporte-campo').forEach(campo => {
+                    params.set(campo.name, campo.checked ? '1' : '0');
+                });
+
+                window.open(`${pdfUrl}?${params.toString()}`, '_blank');
             });
+        }
 
-            params.set('generar_estadistico', '1');
+        // =========================
+        // SI ENVÍAN FORMULARIO ESTADISTICO, QUE QUEDE ABIERTO
+        // =========================
+        if (estadisticoForm) {
+            estadisticoForm.addEventListener('submit', function () {
+                if (estadisticoSection) {
+                    estadisticoSection.classList.remove('d-none');
+                }
+            });
+        }
 
-            window.open(`${pdfUrl}?${params.toString()}`, '_blank');
-        });
-    }
-});
+        // =========================
+        // EXPORTAR PDF ESTADISTICO
+        // =========================
+        if (exportarEstadisticoPdfBtn && estadisticoForm) {
+            exportarEstadisticoPdfBtn.addEventListener('click', function () {
+                const pdfUrl = this.dataset.pdfUrl;
+                const formData = new FormData(estadisticoForm);
+                const params = new URLSearchParams();
+
+                for (const [key, value] of formData.entries()) {
+                    if (key.startsWith('mostrar_')) {
+                        continue;
+                    }
+                    params.append(key, value);
+                }
+
+                document.querySelectorAll('.estadistico-campo').forEach(campo => {
+                    params.set(campo.name, campo.checked ? '1' : '0');
+                });
+
+                params.set('generar_estadistico', '1');
+
+                window.open(`${pdfUrl}?${params.toString()}`, '_blank');
+            });
+        }
+        // =========================
+        // CORREOS MASIVOS
+        // =========================
+        const generarCorreoBtn = document.getElementById('generarCorreoBtn');
+        const cerrarCorreoBtn = document.getElementById('cerrarCorreoBtn');
+        const correoSection = document.getElementById('correoSection');
+
+        if (generarCorreoBtn && correoSection) {    
+            generarCorreoBtn.addEventListener('click', function () {
+                showSection(correoSection, reporteSection);
+                hideSection(estadisticoSection);
+            });
+        }
+
+        if (cerrarCorreoBtn && correoSection) {
+            cerrarCorreoBtn.addEventListener('click', function () {
+                hideSection(correoSection);
+            });
+        }
+    });
+
 </script>

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from myApp import views
+from myApp.views import enviar_correo
 
 ROLES = [
     "acudientes",
@@ -95,6 +96,11 @@ for rol in ROLES:
             views.role_toggle_estado,
             {"rol": rol, "activar": False},
             name=f"{rol}.inactivar",
+        ),
+        path(
+            f"crud/{rol}/correo/<str:tipo>/",
+            views.enviar_correo,
+            name=f"{rol}enviar_correo",
         ),
 
         # =========================

@@ -1,0 +1,30 @@
+<div id="correoSection" class="d-none mt-4">
+    <div class="card shadow">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between mb-3">
+                <h5>Enviar correos masivos</h5>
+                <button id="cerrarCorreoBtn" class="btn btn-danger btn-sm">X</button>
+            </div>
+
+            <form id="correoForm" method="post" action="{% url 'enviar_correo' rol_url %}">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Asunto:</label>
+                    <input type="text" name="asunto" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Mensaje:</label>
+                    <textarea name="mensaje" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Enviar correos
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
