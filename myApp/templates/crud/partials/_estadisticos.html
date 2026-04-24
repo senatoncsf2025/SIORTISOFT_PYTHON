@@ -43,6 +43,7 @@
             <div class="col-12">
                 <h6 class="mb-3">Secciones a incluir en el reporte estadístico</h6>
                 <div class="row g-2">
+
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_conteos_actuales" value="0">
                         <div class="form-check">
@@ -68,7 +69,7 @@
                         <div class="form-check">
                             <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarIngresosDia"
                                 name="mostrar_ingresos_por_dia" value="1" 
-                                {% if secciones_estadistico.mostrar_ingresos_por_dia %}checked{% endif %}>
+                                {% if mostrar_ingresos_por_dia %}checked{% endif %}>
                             <label class="form-check-label" for="mostrarIngresosDia">Ingresos por día</label>
                         </div>
                     </div>
@@ -145,15 +146,17 @@
                             <label class="form-check-label" for="mostrarUltimosMovimientos">Últimos movimientos</label>
                         </div>
                     </div>
+
                     <div class="col-md-4 col-sm-6">
-                        <input type="hidden" name="mostrar_ultimos_movimientos" value="0">
+                        <input type="hidden" name="mostrar_comparacion" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox"
-                                id="mostrarUltimosMovimientos" name="mostrar_ultimos_movimientos" value="1" 
-                                {% if secciones_estadistico.mostrar_ultimos_movimientos %}checked{% endif %}>
-                            <label class="form-check-label" for="mostrarUltimosMovimientos">Comparacion</label>
+                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarComparacion"
+                                name="mostrar_comparacion" value="1" 
+                                {% if secciones_estadistico.mostrar_comparacion %}checked{% endif %}>
+                            <label class="form-check-label" for="mostrarComparacion">Comparación ayer vs hoy</label>
                         </div>
                     </div>
+
                 </div>
             </div>
         </form>

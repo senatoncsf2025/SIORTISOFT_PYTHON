@@ -758,6 +758,7 @@ def obtener_secciones_estadistico(request):
         "mostrar_distribucion_genero": _checkbox_get(request, "mostrar_distribucion_genero", False),
         "mostrar_distribucion_tipo_usuario": _checkbox_get(request, "mostrar_distribucion_tipo_usuario", False),
         "mostrar_ultimos_movimientos": _checkbox_get(request, "mostrar_ultimos_movimientos", False),
+        "mostrar_comparacion": _checkbox_get(request, "mostrar_comparacion", False),
     }
 
 
@@ -1046,6 +1047,44 @@ def construir_datos_estadisticos(request, rol):
 
     secciones_estadistico = obtener_secciones_estadistico(request)
     estadistico_generado = bool(request.GET.get("generar_estadistico"))
+    hoy_local = timezone.localdate()
+    ayer_local = hoy_local - timedelta(days=1)
+
+    ingresos_hoy = Movimiento.objects.filter(
+        usuario__in=usuarios,
+        fecha__date=hoy_local,
+        tipo="ingreso"
+    ).count()
+
+    ingresos_ayer = Movimiento.objects.filter(
+        usuario__in=usuarios,
+        fecha__date=ayer_local,
+        tipo="ingreso"
+    ).count()
+
+    salidas_hoy = Movimiento.objects.filter(
+        usuario__in=usuarios,
+        fecha__date=hoy_local,
+        tipo="salida"
+    ).count()
+
+    salidas_ayer = Movimiento.objects.filter(
+        usuario__in=usuarios,
+        fecha__date=ayer_local,
+        tipo="salida"
+    ).count()
+
+    dif_ingresos = ingresos_hoy - ingresos_ayer
+    dif_salidas = salidas_hoy - salidas_ayer
+
+    def calcular_porcentaje(actual, anterior):
+        if anterior == 0:
+            return 100 if actual > 0 else 0
+        return round(((actual - anterior) / anterior) * 100, 2)
+
+    porc_ingresos = calcular_porcentaje(ingresos_hoy, ingresos_ayer)
+    porc_salidas = calcular_porcentaje(salidas_hoy, salidas_ayer)
+    
 
     return {
         "fecha_inicio": fecha_inicio_txt,
@@ -1081,6 +1120,14 @@ def construir_datos_estadisticos(request, rol):
         "distribucion_genero": distribucion_genero,
         "distribucion_tipo_usuario": distribucion_tipo_usuario,
         "ultimos_movimientos": ultimos_movimientos,
+        "ingresos_hoy": ingresos_hoy,
+        "ingresos_ayer": ingresos_ayer,
+        "salidas_hoy": salidas_hoy,
+        "salidas_ayer": salidas_ayer,
+        "dif_ingresos": dif_ingresos,
+        "dif_salidas": dif_salidas,
+        "porc_ingresos": porc_ingresos,
+        "porc_salidas": porc_salidas,
     }
 
 
@@ -2056,6 +2103,49 @@ def role_stats_pdf(request, rol):
             )
         )
         elements.append(tabla_ultimos)
+        if secciones["mostrar_comparacion"]:
+            elements.append(Spacer(1, 0.4 * cm))
+            elements.append(Paragraph("Comparación de ayer vs hoy", styles["Heading2"]))
+
+            comparacion_data = [
+            ["Tipo", "Ayer", "Hoy", "Diferencia", "Porcentaje"],
+            [
+                "Ingresos",
+                str(datos["ingresos_ayer"]),
+                str(datos["ingresos_hoy"]),
+                str(datos["dif_ingresos"]),
+                f'{datos["porc_ingresos"]}%',
+            ],
+            [
+                "Salidas",
+                str(datos["salidas_ayer"]),
+                str(datos["salidas_hoy"]),
+                str(datos["dif_salidas"]),
+                f'{datos["porc_salidas"]}%',
+            ],
+            ]
+
+        tabla_comparacion = Table(
+            comparacion_data,
+            colWidths=[5 * cm, 4 * cm, 4 * cm, 4 * cm, 4 * cm],
+            repeatRows=1,
+        )
+
+        tabla_comparacion.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("ALIGN", (1, 1), (-1, -1), "CENTER"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+
+        elements.append(tabla_comparacion)   
 
     doc.build(elements)
     return response
@@ -2485,65 +2575,3 @@ def enviar_correo(request, tipo):
         "success": True,
         "message": f"Se enviaron {len(mensajes)} correos"
     })
-hoy = timezone.localtime().date()
-ayer = hoy - timedelta(days=1)
-
-# =========================
-# INGRESOS
-# =========================
-ingresos_hoy = Movimiento.objects.filter(
-    fecha__date=hoy,
-    tipo='entrada'
-).count()
-
-ingresos_ayer = Movimiento.objects.filter(
-    fecha__date=ayer,
-    tipo='entrada'
-).count()
-
-# =========================
-# SALIDAS (opcional pro)
-# =========================
-salidas_hoy = Movimiento.objects.filter(
-    fecha__date=hoy,
-    tipo='salida'
-).count()
-
-salidas_ayer = Movimiento.objects.filter(
-    fecha__date=ayer,
-    tipo='salida'
-).count()
-
-# =========================
-# DIFERENCIAS
-# =========================
-dif_ingresos = ingresos_hoy - ingresos_ayer
-dif_salidas = salidas_hoy - salidas_ayer
-
-# =========================
-# PORCENTAJES
-# =========================
-def calcular_porcentaje(actual, anterior):
-    if anterior == 0:
-        return 100 if actual > 0 else 0
-    return round(((actual - anterior) / anterior) * 100, 2)
-
-porc_ingresos = calcular_porcentaje(ingresos_hoy, ingresos_ayer)
-porc_salidas = calcular_porcentaje(salidas_hoy, salidas_ayer)
-
-# =========================
-# GUARDAR EN CONTEXT
-# =========================
-context = {}
-context.update({
-    'ingresos_hoy': ingresos_hoy,
-    'ingresos_ayer': ingresos_ayer,
-    'salidas_hoy': salidas_hoy,
-    'salidas_ayer': salidas_ayer,
-    'dif_ingresos': dif_ingresos,
-    'dif_salidas': dif_salidas,
-    'porc_ingresos': porc_ingresos,
-    'porc_salidas': porc_salidas,
-})
-request = {}    
-mostrar_comparacion = request.GET.get('mostrar_comparacion') == '1'
