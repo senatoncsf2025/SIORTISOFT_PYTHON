@@ -27,6 +27,13 @@ from django.core.mail import send_mass_mail
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Count
+
+from django.utils import timezone
+from datetime import timedelta
+
 # =========================================================
 # CONSTANTES
 # =========================================================
@@ -2478,3 +2485,65 @@ def enviar_correo(request, tipo):
         "success": True,
         "message": f"Se enviaron {len(mensajes)} correos"
     })
+hoy = timezone.localtime().date()
+ayer = hoy - timedelta(days=1)
+
+# =========================
+# INGRESOS
+# =========================
+ingresos_hoy = Movimiento.objects.filter(
+    fecha__date=hoy,
+    tipo='entrada'
+).count()
+
+ingresos_ayer = Movimiento.objects.filter(
+    fecha__date=ayer,
+    tipo='entrada'
+).count()
+
+# =========================
+# SALIDAS (opcional pro)
+# =========================
+salidas_hoy = Movimiento.objects.filter(
+    fecha__date=hoy,
+    tipo='salida'
+).count()
+
+salidas_ayer = Movimiento.objects.filter(
+    fecha__date=ayer,
+    tipo='salida'
+).count()
+
+# =========================
+# DIFERENCIAS
+# =========================
+dif_ingresos = ingresos_hoy - ingresos_ayer
+dif_salidas = salidas_hoy - salidas_ayer
+
+# =========================
+# PORCENTAJES
+# =========================
+def calcular_porcentaje(actual, anterior):
+    if anterior == 0:
+        return 100 if actual > 0 else 0
+    return round(((actual - anterior) / anterior) * 100, 2)
+
+porc_ingresos = calcular_porcentaje(ingresos_hoy, ingresos_ayer)
+porc_salidas = calcular_porcentaje(salidas_hoy, salidas_ayer)
+
+# =========================
+# GUARDAR EN CONTEXT
+# =========================
+context = {}
+context.update({
+    'ingresos_hoy': ingresos_hoy,
+    'ingresos_ayer': ingresos_ayer,
+    'salidas_hoy': salidas_hoy,
+    'salidas_ayer': salidas_ayer,
+    'dif_ingresos': dif_ingresos,
+    'dif_salidas': dif_salidas,
+    'porc_ingresos': porc_ingresos,
+    'porc_salidas': porc_salidas,
+})
+request = {}    
+mostrar_comparacion = request.GET.get('mostrar_comparacion') == '1'

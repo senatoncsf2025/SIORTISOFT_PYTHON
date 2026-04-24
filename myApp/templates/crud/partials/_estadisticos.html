@@ -6,10 +6,7 @@
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            <button
-                type="button"
-                id="exportarEstadisticoPdfBtn"
-                data-pdf-url="{% url estadistico_pdf_url_name %}"
+            <button type="button" id="exportarEstadisticoPdfBtn" data-pdf-url="{% url estadistico_pdf_url_name %}"
                 class="btn btn-light btn-sm">
                 📄 Exportar PDF estadístico
             </button>
@@ -49,8 +46,9 @@
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_conteos_actuales" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarConteosActuales" name="mostrar_conteos_actuales" value="1"
-                                   {% if secciones_estadistico.mostrar_conteos_actuales %}checked{% endif %}>
+                            <input class="form-check-input estadistico-campo" type="checkbox"
+                                id="mostrarConteosActuales" name="mostrar_conteos_actuales" value="1" 
+                                {% if secciones_estadistico.mostrar_conteos_actuales %}checked{% endif %}>
                             <label class="form-check-label" for="mostrarConteosActuales">Conteos actuales</label>
                         </div>
                     </div>
@@ -58,8 +56,9 @@
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_horas_pico" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarHorasPico" name="mostrar_horas_pico" value="1"
-                                   {% if secciones_estadistico.mostrar_horas_pico %}checked{% endif %}>
+                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarHorasPico"
+                                name="mostrar_horas_pico" value="1" 
+                                {% if secciones_estadistico.mostrar_horas_pico %}checked{% endif %}>
                             <label class="form-check-label" for="mostrarHorasPico">Horas pico</label>
                         </div>
                     </div>
@@ -67,8 +66,9 @@
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_ingresos_por_dia" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarIngresosDia" name="mostrar_ingresos_por_dia" value="1"
-                                   {% if secciones_estadistico.mostrar_ingresos_por_dia %}checked{% endif %}>
+                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarIngresosDia"
+                                name="mostrar_ingresos_por_dia" value="1" 
+                                {% if secciones_estadistico.mostrar_ingresos_por_dia %}checked{% endif %}>
                             <label class="form-check-label" for="mostrarIngresosDia">Ingresos por día</label>
                         </div>
                     </div>
@@ -76,8 +76,9 @@
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_salidas_por_dia" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarSalidasDia" name="mostrar_salidas_por_dia" value="1"
-                                   {% if secciones_estadistico.mostrar_salidas_por_dia %}checked{% endif %}>
+                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarSalidasDia"
+                                name="mostrar_salidas_por_dia" value="1" 
+                                {% if secciones_estadistico.mostrar_salidas_por_dia %}checked{% endif %}>
                             <label class="form-check-label" for="mostrarSalidasDia">Salidas por día</label>
                         </div>
                     </div>
@@ -85,17 +86,20 @@
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_usuarios_frecuentes" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarUsuariosFrecuentes" name="mostrar_usuarios_frecuentes" value="1"
-                                   {% if secciones_estadistico.mostrar_usuarios_frecuentes %}checked{% endif %}>
-                            <label class="form-check-label" for="mostrarUsuariosFrecuentes">Usuarios más frecuentes</label>
+                            <input class="form-check-input estadistico-campo" type="checkbox"
+                                id="mostrarUsuariosFrecuentes" name="mostrar_usuarios_frecuentes" value="1" 
+                                {% if secciones_estadistico.mostrar_usuarios_frecuentes %}checked{% endif %}>
+                            <label class="form-check-label" for="mostrarUsuariosFrecuentes">Usuarios más
+                                frecuentes</label>
                         </div>
                     </div>
 
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_usuarios_menos" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarUsuariosMenos" name="mostrar_usuarios_menos" value="1"
-                                   {% if secciones_estadistico.mostrar_usuarios_menos %}checked{% endif %}>
+                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarUsuariosMenos"
+                                name="mostrar_usuarios_menos" value="1" 
+                                {% if secciones_estadistico.mostrar_usuarios_menos %}checked{% endif %}>
                             <label class="form-check-label" for="mostrarUsuariosMenos">Usuarios menos frecuentes</label>
                         </div>
                     </div>
@@ -103,8 +107,9 @@
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_dentro" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarDentro" name="mostrar_dentro" value="1"
-                                   {% if secciones_estadistico.mostrar_dentro %}checked{% endif %}>
+                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarDentro"
+                                name="mostrar_dentro" value="1" 
+                                {% if secciones_estadistico.mostrar_dentro %}checked{% endif %}>
                             <label class="form-check-label" for="mostrarDentro">Quién está adentro actualmente</label>
                         </div>
                     </div>
@@ -112,27 +117,41 @@
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_distribucion_genero" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarDistribucionGenero" name="mostrar_distribucion_genero" value="1"
-                                   {% if secciones_estadistico.mostrar_distribucion_genero %}checked{% endif %}>
-                            <label class="form-check-label" for="mostrarDistribucionGenero">Distribución por género</label>
+                            <input class="form-check-input estadistico-campo" type="checkbox"
+                                id="mostrarDistribucionGenero" name="mostrar_distribucion_genero" value="1" 
+                                {% if secciones_estadistico.mostrar_distribucion_genero %}checked{% endif %}>
+                            <label class="form-check-label" for="mostrarDistribucionGenero">Distribución por
+                                género</label>
                         </div>
                     </div>
 
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_distribucion_tipo_usuario" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarDistribucionTipoUsuario" name="mostrar_distribucion_tipo_usuario" value="1"
-                                   {% if secciones_estadistico.mostrar_distribucion_tipo_usuario %}checked{% endif %}>
-                            <label class="form-check-label" for="mostrarDistribucionTipoUsuario">Distribución por tipo de usuario</label>
+                            <input class="form-check-input estadistico-campo" type="checkbox"
+                                id="mostrarDistribucionTipoUsuario" name="mostrar_distribucion_tipo_usuario" value="1"
+                                {% if secciones_estadistico.mostrar_distribucion_tipo_usuario %}checked{% endif %}>
+                            <label class="form-check-label" for="mostrarDistribucionTipoUsuario">Distribución por tipo
+                                de usuario</label>
                         </div>
                     </div>
 
                     <div class="col-md-4 col-sm-6">
                         <input type="hidden" name="mostrar_ultimos_movimientos" value="0">
                         <div class="form-check">
-                            <input class="form-check-input estadistico-campo" type="checkbox" id="mostrarUltimosMovimientos" name="mostrar_ultimos_movimientos" value="1"
-                                   {% if secciones_estadistico.mostrar_ultimos_movimientos %}checked{% endif %}>
+                            <input class="form-check-input estadistico-campo" type="checkbox"
+                                id="mostrarUltimosMovimientos" name="mostrar_ultimos_movimientos" value="1" 
+                                {% if secciones_estadistico.mostrar_ultimos_movimientos %}checked{% endif %}>
                             <label class="form-check-label" for="mostrarUltimosMovimientos">Últimos movimientos</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <input type="hidden" name="mostrar_ultimos_movimientos" value="0">
+                        <div class="form-check">
+                            <input class="form-check-input estadistico-campo" type="checkbox"
+                                id="mostrarUltimosMovimientos" name="mostrar_ultimos_movimientos" value="1" 
+                                {% if secciones_estadistico.mostrar_ultimos_movimientos %}checked{% endif %}>
+                            <label class="form-check-label" for="mostrarUltimosMovimientos">Comparacion</label>
                         </div>
                     </div>
                 </div>
@@ -218,6 +237,26 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 bg-danger-subtle h-100">
+                    <div class="card-body">
+                        <div class="text-muted small">Comparación ingresos</div>
+
+                        <div class="fs-3 fw-bold">
+                            {{ ingresos_hoy }}
+                        </div>
+
+                        <div class="
+                small
+                {% if dif_ingresos > 0 %}text-success
+                {% elif dif_ingresos < 0 %}text-danger
+                {% else %}text-muted{% endif %}
+            ">
+                            {{ dif_ingresos }} ({{ porc_ingresos }}%)
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {% if secciones_estadistico.mostrar_conteos_actuales %}
@@ -255,26 +294,26 @@
             </div>
             <div class="card-body">
                 {% if horas_pico %}
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Hora</th>
-                                    <th>Total movimientos</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in horas_pico %}
-                                <tr>
-                                    <td>{{ item.hora }}:00</td>
-                                    <td>{{ item.total }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Total movimientos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in horas_pico %}
+                            <tr>
+                                <td>{{ item.hora }}:00</td>
+                                <td>{{ item.total }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay datos de horas pico para el rango seleccionado.</div>
+                <div class="text-muted">No hay datos de horas pico para el rango seleccionado.</div>
                 {% endif %}
             </div>
         </div>
@@ -287,26 +326,26 @@
             </div>
             <div class="card-body">
                 {% if ingresos_por_dia %}
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in ingresos_por_dia %}
-                                <tr>
-                                    <td>{{ item.dia|date:"Y-m-d" }}</td>
-                                    <td>{{ item.total }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in ingresos_por_dia %}
+                            <tr>
+                                <td>{{ item.dia|date:"Y-m-d" }}</td>
+                                <td>{{ item.total }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay ingresos en el rango seleccionado.</div>
+                <div class="text-muted">No hay ingresos en el rango seleccionado.</div>
                 {% endif %}
             </div>
         </div>
@@ -319,26 +358,26 @@
             </div>
             <div class="card-body">
                 {% if salidas_por_dia %}
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in salidas_por_dia %}
-                                <tr>
-                                    <td>{{ item.dia|date:"Y-m-d" }}</td>
-                                    <td>{{ item.total }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in salidas_por_dia %}
+                            <tr>
+                                <td>{{ item.dia|date:"Y-m-d" }}</td>
+                                <td>{{ item.total }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay salidas en el rango seleccionado.</div>
+                <div class="text-muted">No hay salidas en el rango seleccionado.</div>
                 {% endif %}
             </div>
         </div>
@@ -351,28 +390,28 @@
             </div>
             <div class="card-body">
                 {% if usuarios_frecuentes %}
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Cédula</th>
-                                    <th>Total movimientos</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for u in usuarios_frecuentes %}
-                                <tr>
-                                    <td>{{ u.nombre_completo }}</td>
-                                    <td>{{ u.cedula }}</td>
-                                    <td>{{ u.total_movimientos }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cédula</th>
+                                <th>Total movimientos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in usuarios_frecuentes %}
+                            <tr>
+                                <td>{{ u.nombre_completo }}</td>
+                                <td>{{ u.cedula }}</td>
+                                <td>{{ u.total_movimientos }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay usuarios frecuentes para mostrar.</div>
+                <div class="text-muted">No hay usuarios frecuentes para mostrar.</div>
                 {% endif %}
             </div>
         </div>
@@ -385,28 +424,28 @@
             </div>
             <div class="card-body">
                 {% if usuarios_menos %}
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Cédula</th>
-                                    <th>Total movimientos</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for u in usuarios_menos %}
-                                <tr>
-                                    <td>{{ u.nombre_completo }}</td>
-                                    <td>{{ u.cedula }}</td>
-                                    <td>{{ u.total_movimientos }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cédula</th>
+                                <th>Total movimientos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in usuarios_menos %}
+                            <tr>
+                                <td>{{ u.nombre_completo }}</td>
+                                <td>{{ u.cedula }}</td>
+                                <td>{{ u.total_movimientos }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay usuarios menos frecuentes para mostrar.</div>
+                <div class="text-muted">No hay usuarios menos frecuentes para mostrar.</div>
                 {% endif %}
             </div>
         </div>
@@ -419,34 +458,34 @@
             </div>
             <div class="card-body">
                 {% if dentro %}
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Cédula</th>
-                                    <th>Último movimiento</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for d in dentro %}
-                                <tr>
-                                    <td>{{ d.nombre_completo }}</td>
-                                    <td>{{ d.cedula }}</td>
-                                    <td>
-                                        {% if d.ultima_fecha %}
-                                            {{ d.ultima_fecha|date:"Y-m-d H:i" }}
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cédula</th>
+                                <th>Último movimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in dentro %}
+                            <tr>
+                                <td>{{ d.nombre_completo }}</td>
+                                <td>{{ d.cedula }}</td>
+                                <td>
+                                    {% if d.ultima_fecha %}
+                                    {{ d.ultima_fecha|date:"Y-m-d H:i" }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay personas dentro en este momento.</div>
+                <div class="text-muted">No hay personas dentro en este momento.</div>
                 {% endif %}
             </div>
         </div>
@@ -459,26 +498,26 @@
             </div>
             <div class="card-body">
                 {% if distribucion_genero %}
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Género</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in distribucion_genero %}
-                                <tr>
-                                    <td>{{ item.genero|default:"Sin definir" }}</td>
-                                    <td>{{ item.total }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Género</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in distribucion_genero %}
+                            <tr>
+                                <td>{{ item.genero|default:"Sin definir" }}</td>
+                                <td>{{ item.total }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay datos de género.</div>
+                <div class="text-muted">No hay datos de género.</div>
                 {% endif %}
             </div>
         </div>
@@ -491,26 +530,26 @@
             </div>
             <div class="card-body">
                 {% if distribucion_tipo_usuario %}
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in distribucion_tipo_usuario %}
-                                <tr>
-                                    <td>{{ item.tipo_usuario|default:"Sin definir" }}</td>
-                                    <td>{{ item.total }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in distribucion_tipo_usuario %}
+                            <tr>
+                                <td>{{ item.tipo_usuario|default:"Sin definir" }}</td>
+                                <td>{{ item.total }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay datos de tipo de usuario.</div>
+                <div class="text-muted">No hay datos de tipo de usuario.</div>
                 {% endif %}
             </div>
         </div>
@@ -523,39 +562,80 @@
             </div>
             <div class="card-body">
                 {% if ultimos_movimientos %}
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Usuario</th>
-                                    <th>Cédula</th>
-                                    <th>Tipo</th>
-                                    <th>Registrado por</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for m in ultimos_movimientos %}
-                                <tr>
-                                    <td>{{ m.fecha|date:"Y-m-d H:i" }}</td>
-                                    <td>{{ m.usuario.nombre_completo }}</td>
-                                    <td>{{ m.usuario.cedula }}</td>
-                                    <td>{{ m.tipo|capfirst }}</td>
-                                    <td>
-                                        {% if m.registrado_por %}
-                                            {{ m.registrado_por.nombre_completo }}
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Cédula</th>
+                                <th>Tipo</th>
+                                <th>Registrado por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in ultimos_movimientos %}
+                            <tr>
+                                <td>{{ m.fecha|date:"Y-m-d H:i" }}</td>
+                                <td>{{ m.usuario.nombre_completo }}</td>
+                                <td>{{ m.usuario.cedula }}</td>
+                                <td>{{ m.tipo|capfirst }}</td>
+                                <td>
+                                    {% if m.registrado_por %}
+                                    {{ m.registrado_por.nombre_completo }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-muted">No hay movimientos recientes.</div>
+                <div class="text-muted">No hay movimientos recientes.</div>
                 {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% if secciones_estadistico.mostrar_comparacion %}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-light">
+                <strong>Comparación de ayer vs hoy</strong>
+            </div>
+
+            <div class="card-body">
+                <div class="row text-center">
+
+                    <!-- INGRESOS -->
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Ingresos</h6>
+                        <p>Ayer: <strong>{{ ingresos_ayer }}</strong></p>
+                        <p>Hoy: <strong>{{ ingresos_hoy }}</strong></p>
+
+                        <p class="
+                    {% if dif_ingresos > 0 %}text-success
+                    {% elif dif_ingresos < 0 %}text-danger
+                    {% endif %}">
+                            Diferencia: {{ dif_ingresos }} ({{ porc_ingresos }}%)
+                        </p>
+                    </div>
+
+                    <!-- SALIDAS -->
+                    <div class="col-md-6">
+                        <h6 class="text-warning">Salidas</h6>
+                        <p>Ayer: <strong>{{ salidas_ayer }}</strong></p>
+                        <p>Hoy: <strong>{{ salidas_hoy }}</strong></p>
+
+                        <p class="
+                    {% if dif_salidas > 0 %}text-success
+                    {% elif dif_salidas < 0 %}text-danger
+                    {% endif %}">
+                            Diferencia: {{ dif_salidas }} ({{ porc_salidas }}%)
+                        </p>
+                    </div>
+
+                </div>
             </div>
         </div>
         {% endif %}
