@@ -1,17 +1,15 @@
 import re
-from datetime import datetime
+from datetime import date, datetime
 
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from reportlab.lib import colors
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib.units import cm
-from reportlab.platypus import Table, TableStyle
-
 from ..models import Usuario
 
 
+# =========================================================
+# CONSTANTES
+# =========================================================
 ROLES_VALIDOS = [
     "acudientes",
     "docentes",
@@ -58,11 +56,16 @@ PASSWORD_REGEX = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_\-+=/\\])[A-Za
 SERIAL_PC_REGEX = r"[A-Za-z0-9]{4}"
 
 
+# =========================================================
+# HELPERS GENERALES
+# =========================================================
 def redirigir_por_rol(user):
     if user.rol == "admin":
         return redirect("index2")
+
     if user.rol == "vigilante":
         return redirect("dashboard")
+
     return redirect("index")
 
 
@@ -70,6 +73,7 @@ def validar_admin(request):
     if request.user.rol != "admin":
         messages.error(request, "No tienes acceso al CRUD administrativo")
         return False
+
     return True
 
 
@@ -77,6 +81,7 @@ def validar_acceso_sistema(request):
     if request.user.rol not in ["admin", "vigilante"]:
         messages.error(request, "No tienes acceso a esta sección")
         return False
+
     return True
 
 
@@ -87,6 +92,7 @@ def validar_rol_valido(rol):
 def validar_rol_login(rol):
     if rol not in ["admin", "vigilante"]:
         return "Solo puedes registrar administradores o vigilantes"
+
     return None
 
 
@@ -123,6 +129,9 @@ def get_role_queryset(rol):
     return Usuario.objects.filter(subrol=rol).order_by("-created_at")
 
 
+# =========================================================
+# NORMALIZADORES
+# =========================================================
 def normalizar_genero(valor):
     if not valor:
         return ""
@@ -159,6 +168,9 @@ def normalizar_tipo_usuario(valor):
     return mapa.get(valor, valor)
 
 
+# =========================================================
+# VALIDACIONES
+# =========================================================
 def validar_nombre(valor, campo="nombre", obligatorio=True):
     if obligatorio and not valor:
         return f"El {campo} es obligatorio"
@@ -250,6 +262,7 @@ def parse_fecha(fecha_texto, obligatoria=False, validar_mayoria_edad=False):
     if not fecha_texto:
         if obligatoria:
             return None, "La fecha es obligatoria"
+
         return None, None
 
     try:
@@ -258,9 +271,7 @@ def parse_fecha(fecha_texto, obligatoria=False, validar_mayoria_edad=False):
         return None, "La fecha no es válida"
 
     if validar_mayoria_edad:
-        from django.utils import timezone
-
-        hoy = timezone.localdate()
+        hoy = date.today()
         edad = hoy.year - fecha.year - ((hoy.month, hoy.day) < (fecha.month, fecha.day))
 
         if edad < 18:
@@ -269,6 +280,9 @@ def parse_fecha(fecha_texto, obligatoria=False, validar_mayoria_edad=False):
     return fecha, None
 
 
+# =========================================================
+# FORMULARIOS USUARIO
+# =========================================================
 def extraer_form_data(request):
     return {
         "nombre": request.POST.get("nombre", "").strip(),
@@ -280,7 +294,9 @@ def extraer_form_data(request):
         "genero": normalizar_genero(request.POST.get("genero", "").strip()),
         "fecha_nacimiento": request.POST.get("fecha_nacimiento", "").strip(),
         "cargo": request.POST.get("cargo", "").strip(),
-        "tipo_usuario": normalizar_tipo_usuario(request.POST.get("tipo_usuario", "").strip()),
+        "tipo_usuario": normalizar_tipo_usuario(
+            request.POST.get("tipo_usuario", "").strip()
+        ),
         "codigo_vigilante": request.POST.get("codigo_vigilante", "").strip(),
     }
 
@@ -288,6 +304,8 @@ def extraer_form_data(request):
 def construir_contexto_registro_interno(request, extra=None):
     context = extraer_form_data(request)
     context["rol"] = request.POST.get("rol", "").strip()
+    context["generos"] = GENEROS
+    context["tipos_usuario"] = TIPOS_USUARIO
 
     if extra:
         context.update(extra)
@@ -296,18 +314,37 @@ def construir_contexto_registro_interno(request, extra=None):
 
 
 def validar_form_usuario(form_data, rol, usuario_id=None):
-    for error in [
-        validar_nombre(form_data["nombre"], "nombre", True),
-        validar_nombre(form_data["apellido"], "apellido", False),
-        validar_cedula(form_data["cedula"]),
-        validar_email(form_data["email"], False),
-        validar_telefono(form_data["telefono"], False),
-        parse_fecha(form_data["fecha_nacimiento"], obligatoria=False)[1],
-        validar_genero(form_data["genero"], obligatorio=False),
-        validar_tipo_usuario(form_data["tipo_usuario"], obligatorio=False),
-    ]:
-        if error:
-            return error
+    error = validar_nombre(form_data["nombre"], "nombre", True)
+    if error:
+        return error
+
+    error = validar_nombre(form_data["apellido"], "apellido", False)
+    if error:
+        return error
+
+    error = validar_cedula(form_data["cedula"])
+    if error:
+        return error
+
+    error = validar_email(form_data["email"], False)
+    if error:
+        return error
+
+    error = validar_telefono(form_data["telefono"], False)
+    if error:
+        return error
+
+    _, error = parse_fecha(form_data["fecha_nacimiento"], obligatoria=False)
+    if error:
+        return error
+
+    error = validar_genero(form_data["genero"], obligatorio=False)
+    if error:
+        return error
+
+    error = validar_tipo_usuario(form_data["tipo_usuario"], obligatorio=False)
+    if error:
+        return error
 
     cedula_qs = Usuario.objects.filter(cedula=form_data["cedula"])
 
@@ -348,37 +385,60 @@ def poblar_usuario_desde_form(usuario, form_data, rol):
 
     if rol == "vigilantes":
         usuario.codigo_vigilante = form_data["codigo_vigilante"] or None
-    else:
-        usuario.codigo_vigilante = None
 
     return usuario
 
 
 def validar_form_registro_interno(form_data, rol_login, password, password2):
-    for error in [
-        validar_nombre(form_data["nombre"], "nombre", True),
-        validar_nombre(form_data["apellido"], "apellido", False),
-        validar_cedula(form_data["cedula"]),
-        validar_email(form_data["email"], True),
-        validar_telefono(form_data["telefono"], True),
-        validar_genero(form_data["genero"], obligatorio=True),
-        parse_fecha(
-            form_data["fecha_nacimiento"],
-            obligatoria=True,
-            validar_mayoria_edad=True,
-        )[1],
-        validar_tipo_usuario(form_data["tipo_usuario"], obligatorio=True),
-        validar_rol_login(rol_login),
-        validar_password_registro(password, password2),
-    ]:
-        if error:
-            return error
+    error = validar_nombre(form_data["nombre"], "nombre", True)
+    if error:
+        return error
+
+    error = validar_nombre(form_data["apellido"], "apellido", False)
+    if error:
+        return error
+
+    error = validar_cedula(form_data["cedula"])
+    if error:
+        return error
+
+    error = validar_email(form_data["email"], True)
+    if error:
+        return error
+
+    error = validar_telefono(form_data["telefono"], True)
+    if error:
+        return error
 
     if not form_data["direccion"]:
         return "La dirección es obligatoria"
 
+    error = validar_genero(form_data["genero"], obligatorio=True)
+    if error:
+        return error
+
+    _, error = parse_fecha(
+        form_data["fecha_nacimiento"],
+        obligatoria=True,
+        validar_mayoria_edad=True,
+    )
+    if error:
+        return error
+
+    error = validar_tipo_usuario(form_data["tipo_usuario"], obligatorio=True)
+    if error:
+        return error
+
+    error = validar_rol_login(rol_login)
+    if error:
+        return error
+
     if rol_login == "vigilante" and not form_data["codigo_vigilante"]:
         return "El código del vigilante es obligatorio"
+
+    error = validar_password_registro(password, password2)
+    if error:
+        return error
 
     if Usuario.objects.filter(email=form_data["email"]).exists():
         return "El correo ya está registrado"
@@ -413,7 +473,9 @@ def crear_usuario_desde_form_data(
         tipo_usuario=form_data["tipo_usuario"] or None,
         rol=rol_sistema,
         subrol=subrol,
-        codigo_vigilante=form_data["codigo_vigilante"] if subrol == "vigilantes" else None,
+        codigo_vigilante=(
+            form_data["codigo_vigilante"] if subrol == "vigilantes" else None
+        ),
         activo=activo,
         registrado_por=registrado_por,
     )
@@ -427,222 +489,3 @@ def crear_usuario_desde_form_data(
 
     usuario.save()
     return usuario
-
-
-def construir_styles_pdf():
-    styles = getSampleStyleSheet()
-
-    styles.add(
-        ParagraphStyle(
-            name="TituloCustom",
-            parent=styles["Heading1"],
-            fontSize=18,
-            leading=22,
-            spaceAfter=12,
-            textColor=colors.HexColor("#0f172a"),
-        )
-    )
-
-    styles.add(
-        ParagraphStyle(
-            name="SubtituloCustom",
-            parent=styles["Normal"],
-            fontSize=10,
-            leading=12,
-            textColor=colors.HexColor("#475569"),
-        )
-    )
-
-    return styles
-
-
-def construir_headers_reporte(columnas_reporte):
-    headers = []
-
-    if columnas_reporte["mostrar_nombre"]:
-        headers.append("Nombre")
-    if columnas_reporte["mostrar_apellido"]:
-        headers.append("Apellido")
-    if columnas_reporte["mostrar_cedula"]:
-        headers.append("Cédula")
-    if columnas_reporte["mostrar_telefono"]:
-        headers.append("Teléfono")
-    if columnas_reporte["mostrar_email"]:
-        headers.append("Email")
-    if columnas_reporte["mostrar_direccion"]:
-        headers.append("Dirección")
-    if columnas_reporte["mostrar_vehiculo"]:
-        headers.append("Vehículo")
-    if columnas_reporte["mostrar_pc"]:
-        headers.append("PC")
-    if columnas_reporte["mostrar_estado"]:
-        headers.append("Estado")
-
-    return headers
-
-
-def construir_tabla_resumen_filtros(filtros_reporte):
-    movimientos_label = "Todos"
-
-    if filtros_reporte["incluir_ingresos"] == "1" and filtros_reporte["incluir_salidas"] == "1":
-        movimientos_label = "Ingresos y salidas"
-    elif filtros_reporte["incluir_ingresos"] == "1":
-        movimientos_label = "Solo ingresos"
-    elif filtros_reporte["incluir_salidas"] == "1":
-        movimientos_label = "Solo salidas"
-
-    resumen_filtros = [
-        ["Nombre", filtros_reporte["reporte_nombre"] or "Todos", "Apellido", filtros_reporte["reporte_apellido"] or "Todos"],
-        ["Cédula", filtros_reporte["reporte_cedula"] or "Todas", "Email", filtros_reporte["reporte_email"] or "Todos"],
-        ["Teléfono", filtros_reporte["reporte_telefono"] or "Todos", "Estado", filtros_reporte["reporte_estado"] or "Todos"],
-        ["Género", filtros_reporte["reporte_genero"] or "Todos", "Tipo usuario", filtros_reporte["reporte_tipo_usuario"] or "Todos"],
-        ["Fecha desde", filtros_reporte["reporte_fecha_desde"] or "Sin filtro", "Movimientos", movimientos_label],
-    ]
-
-    table = Table(resumen_filtros, colWidths=[3 * cm, 7 * cm, 3 * cm, 7 * cm])
-    table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
-                ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#cbd5e1")),
-                ("INNERGRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
-                ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-                ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-                ("FONTNAME", (2, 0), (2, -1), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("PADDING", (0, 0), (-1, -1), 5),
-            ]
-        )
-    )
-
-    return table
-
-
-def construir_data_usuarios_reporte(usuarios_reporte, columnas_reporte):
-    headers = construir_headers_reporte(columnas_reporte)
-    data = [headers]
-
-    for usuario in usuarios_reporte:
-        row = []
-
-        if columnas_reporte["mostrar_nombre"]:
-            row.append(usuario.nombre or "-")
-        if columnas_reporte["mostrar_apellido"]:
-            row.append(usuario.apellido or "-")
-        if columnas_reporte["mostrar_cedula"]:
-            row.append(usuario.cedula or "-")
-        if columnas_reporte["mostrar_telefono"]:
-            row.append(usuario.telefono or "-")
-        if columnas_reporte["mostrar_email"]:
-            row.append(usuario.email or "-")
-        if columnas_reporte["mostrar_direccion"]:
-            row.append(usuario.direccion or "-")
-        if columnas_reporte["mostrar_vehiculo"]:
-            row.append(usuario.vehiculo.placa if getattr(usuario, "vehiculo", None) else "-")
-        if columnas_reporte["mostrar_pc"]:
-            row.append(usuario.computador.serial if getattr(usuario, "computador", None) else "-")
-        if columnas_reporte["mostrar_estado"]:
-            row.append("Activo" if usuario.activo else "Inactivo")
-
-        data.append(row)
-
-    if len(data) == 1:
-        data.append(["No hay datos para el reporte"] + [""] * max(len(headers) - 1, 0))
-
-    return headers, data
-
-
-def construir_tabla_usuarios_reporte(usuarios_reporte, columnas_reporte):
-    headers, data = construir_data_usuarios_reporte(usuarios_reporte, columnas_reporte)
-
-    col_count = max(len(headers), 1)
-    total_width = 26 * cm
-    col_widths = [total_width / col_count] * col_count
-
-    table = Table(data, colWidths=col_widths, repeatRows=1)
-    table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f766e")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
-                ("BACKGROUND", (0, 1), (-1, -1), colors.white),
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("PADDING", (0, 0), (-1, -1), 5),
-            ]
-        )
-    )
-
-    return table
-
-
-def construir_tabla_movimientos(movimientos_reporte):
-    mov_data = [
-        [
-            "Fecha",
-            "Usuario",
-            "Cédula",
-            "Tipo",
-            "Vehículo",
-            "Placa",
-            "PC",
-            "Serial PC",
-            "Observaciones",
-            "Registrado por",
-        ]
-    ]
-
-    for movimiento in movimientos_reporte:
-        mov_data.append(
-            [
-                movimiento.fecha.strftime("%Y-%m-%d %H:%M"),
-                movimiento.usuario.nombre_completo if movimiento.usuario else "-",
-                movimiento.usuario.cedula if movimiento.usuario else "-",
-                movimiento.tipo.capitalize(),
-                "Sí" if movimiento.trae_vehiculo else "No",
-                movimiento.placa or "-",
-                "Sí" if movimiento.trae_pc else "No",
-                movimiento.serial_pc or "-",
-                movimiento.observaciones or "-",
-                movimiento.registrado_por.nombre_completo if movimiento.registrado_por else "-",
-            ]
-        )
-
-    if len(mov_data) == 1:
-        mov_data.append(["No hay movimientos registrados", "", "", "", "", "", "", "", "", ""])
-
-    table = Table(
-        mov_data,
-        colWidths=[
-            2.8 * cm,
-            3.6 * cm,
-            2.4 * cm,
-            2.1 * cm,
-            1.8 * cm,
-            2.4 * cm,
-            1.5 * cm,
-            2.5 * cm,
-            5.8 * cm,
-            3.1 * cm,
-        ],
-        repeatRows=1,
-    )
-
-    table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#334155")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 7),
-                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("PADDING", (0, 0), (-1, -1), 4),
-            ]
-        )
-    )
-
-    return table

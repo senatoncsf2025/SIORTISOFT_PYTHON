@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from .common import (
+    GENEROS,
+    TIPOS_USUARIO,
     construir_contexto_registro_interno,
     extraer_form_data,
     parse_fecha,
@@ -67,6 +69,7 @@ def register_view(request):
         context = construir_contexto_registro_interno(request)
 
         error = validar_form_registro_interno(form_data, rol, password, password2)
+
         if error:
             messages.error(request, error)
             return render(request, "auth/register.html", context)
@@ -98,4 +101,11 @@ def register_view(request):
         messages.success(request, "Usuario creado correctamente")
         return redirect("index2")
 
-    return render(request, "auth/register.html")
+    return render(
+        request,
+        "auth/register.html",
+        {
+            "generos": GENEROS,
+            "tipos_usuario": TIPOS_USUARIO,
+        },
+    )

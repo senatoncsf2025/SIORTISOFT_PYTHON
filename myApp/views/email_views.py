@@ -42,20 +42,25 @@ def enviar_correo(request, tipo):
         )
 
     usuarios = (
-        Usuario.objects.filter(subrol=tipo, activo=True)
+        Usuario.objects.filter(
+            subrol=tipo,
+            activo=True,
+        )
         .exclude(email__isnull=True)
         .exclude(email="")
     )
 
-    mensajes = [
-        (
-            asunto,
-            f"Hola {usuario.nombre}\n\n{mensaje}",
-            settings.DEFAULT_FROM_EMAIL,
-            [usuario.email],
+    mensajes = []
+
+    for usuario in usuarios:
+        mensajes.append(
+            (
+                asunto,
+                f"Hola {usuario.nombre}\n\n{mensaje}",
+                settings.DEFAULT_FROM_EMAIL,
+                [usuario.email],
+            )
         )
-        for usuario in usuarios
-    ]
 
     if not mensajes:
         return JsonResponse(
@@ -65,16 +70,7 @@ def enviar_correo(request, tipo):
             }
         )
 
-    try:
-        send_mass_mail(mensajes, fail_silently=False)
-    except Exception as e:
-        return JsonResponse(
-            {
-                "success": False,
-                "message": f"Error enviando correos: {str(e)}",
-            },
-            status=500,
-        )
+    send_mass_mail(mensajes, fail_silently=False)
 
     return JsonResponse(
         {

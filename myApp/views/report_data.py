@@ -1,16 +1,16 @@
 from datetime import date, timedelta
 
-from django.db.models import Count, OuterRef, Subquery, IntegerField, Value
-from django.db.models.functions import TruncDate, ExtractHour, Coalesce
+from django.db.models import Count, IntegerField, OuterRef, Subquery, Value
+from django.db.models.functions import Coalesce, ExtractHour, TruncDate
 from django.utils import timezone
 
-from ..models import Movimiento, Usuario
 from .common import (
+    get_role_queryset,
     normalizar_genero,
     normalizar_tipo_usuario,
     parse_fecha,
-    get_role_queryset,
 )
+from ..models import Movimiento, Usuario
 
 
 def obtener_filtros_reporte(request):
@@ -21,8 +21,12 @@ def obtener_filtros_reporte(request):
         "reporte_email": request.GET.get("reporte_email", "").strip(),
         "reporte_telefono": request.GET.get("reporte_telefono", "").strip(),
         "reporte_estado": request.GET.get("reporte_estado", "").strip(),
-        "reporte_genero": normalizar_genero(request.GET.get("reporte_genero", "").strip()),
-        "reporte_tipo_usuario": normalizar_tipo_usuario(request.GET.get("reporte_tipo_usuario", "").strip()),
+        "reporte_genero": normalizar_genero(
+            request.GET.get("reporte_genero", "").strip()
+        ),
+        "reporte_tipo_usuario": normalizar_tipo_usuario(
+            request.GET.get("reporte_tipo_usuario", "").strip()
+        ),
         "reporte_fecha_desde": request.GET.get("reporte_fecha_desde", "").strip(),
         "incluir_ingresos": request.GET.get("incluir_ingresos", ""),
         "incluir_salidas": request.GET.get("incluir_salidas", ""),
@@ -79,23 +83,44 @@ def construir_datos_reporte(request, rol, base_qs=None):
     usuarios_reporte = base_qs
 
     if filtros_reporte["reporte_nombre"]:
-        usuarios_reporte = usuarios_reporte.filter(nombre__icontains=filtros_reporte["reporte_nombre"])
+        usuarios_reporte = usuarios_reporte.filter(
+            nombre__icontains=filtros_reporte["reporte_nombre"]
+        )
+
     if filtros_reporte["reporte_apellido"]:
-        usuarios_reporte = usuarios_reporte.filter(apellido__icontains=filtros_reporte["reporte_apellido"])
+        usuarios_reporte = usuarios_reporte.filter(
+            apellido__icontains=filtros_reporte["reporte_apellido"]
+        )
+
     if filtros_reporte["reporte_cedula"]:
-        usuarios_reporte = usuarios_reporte.filter(cedula__icontains=filtros_reporte["reporte_cedula"])
+        usuarios_reporte = usuarios_reporte.filter(
+            cedula__icontains=filtros_reporte["reporte_cedula"]
+        )
+
     if filtros_reporte["reporte_email"]:
-        usuarios_reporte = usuarios_reporte.filter(email__icontains=filtros_reporte["reporte_email"])
+        usuarios_reporte = usuarios_reporte.filter(
+            email__icontains=filtros_reporte["reporte_email"]
+        )
+
     if filtros_reporte["reporte_telefono"]:
-        usuarios_reporte = usuarios_reporte.filter(telefono__icontains=filtros_reporte["reporte_telefono"])
+        usuarios_reporte = usuarios_reporte.filter(
+            telefono__icontains=filtros_reporte["reporte_telefono"]
+        )
+
     if filtros_reporte["reporte_estado"] == "activos":
         usuarios_reporte = usuarios_reporte.filter(activo=True)
     elif filtros_reporte["reporte_estado"] == "inactivos":
         usuarios_reporte = usuarios_reporte.filter(activo=False)
+
     if filtros_reporte["reporte_genero"]:
-        usuarios_reporte = usuarios_reporte.filter(genero=filtros_reporte["reporte_genero"])
+        usuarios_reporte = usuarios_reporte.filter(
+            genero=filtros_reporte["reporte_genero"]
+        )
+
     if filtros_reporte["reporte_tipo_usuario"]:
-        usuarios_reporte = usuarios_reporte.filter(tipo_usuario=filtros_reporte["reporte_tipo_usuario"])
+        usuarios_reporte = usuarios_reporte.filter(
+            tipo_usuario=filtros_reporte["reporte_tipo_usuario"]
+        )
 
     usuario_reporte = None
     texto_periodo_reporte = "Reporte de movimientos"
@@ -113,6 +138,7 @@ def construir_datos_reporte(request, rol, base_qs=None):
 
     if filtros_reporte["incluir_ingresos"] == "1":
         tipos.append("ingreso")
+
     if filtros_reporte["incluir_salidas"] == "1":
         tipos.append("salida")
 
@@ -120,13 +146,20 @@ def construir_datos_reporte(request, rol, base_qs=None):
         movimientos_reporte = movimientos_reporte.filter(tipo__in=tipos)
 
     if filtros_reporte["reporte_fecha_desde"]:
-        fecha_desde_obj, error_fecha = parse_fecha(filtros_reporte["reporte_fecha_desde"])
+        fecha_desde_obj, error_fecha = parse_fecha(
+            filtros_reporte["reporte_fecha_desde"],
+            obligatoria=False,
+        )
 
         if error_fecha:
             error_fecha_reporte = error_fecha
         elif fecha_desde_obj:
-            movimientos_reporte = movimientos_reporte.filter(fecha__date__gte=fecha_desde_obj)
-            texto_periodo_reporte = f"Reportes desde la fecha: {fecha_desde_obj.strftime('%Y-%m-%d')}"
+            movimientos_reporte = movimientos_reporte.filter(
+                fecha__date__gte=fecha_desde_obj
+            )
+            texto_periodo_reporte = (
+                f"Reportes desde la fecha: {fecha_desde_obj.strftime('%Y-%m-%d')}"
+            )
 
     movimientos_reporte = movimientos_reporte.filter(usuario__in=usuarios_reporte)
 
@@ -141,7 +174,10 @@ def construir_datos_reporte(request, rol, base_qs=None):
         usuarios_reporte = usuarios_reporte.filter(id__in=usuarios_con_movimientos).distinct()
         movimientos_reporte = movimientos_reporte.filter(usuario__in=usuarios_reporte)
 
-    movimientos_reporte = movimientos_reporte.select_related("usuario", "registrado_por").order_by("-fecha")
+    movimientos_reporte = movimientos_reporte.select_related(
+        "usuario",
+        "registrado_por",
+    ).order_by("-fecha")
 
     return {
         "usuarios_reporte": usuarios_reporte,
@@ -191,6 +227,7 @@ def construir_datos_estadisticos(request, rol):
 
     if fecha_inicio:
         movimientos_filtrados = movimientos_filtrados.filter(fecha__date__gte=fecha_inicio)
+
     if fecha_fin:
         movimientos_filtrados = movimientos_filtrados.filter(fecha__date__lte=fecha_fin)
 
@@ -200,8 +237,6 @@ def construir_datos_estadisticos(request, rol):
 
     if fecha_inicio:
         subquery_total_movimientos = subquery_total_movimientos.filter(fecha__date__gte=fecha_inicio)
-    else:
-        subquery_total_movimientos = subquery_total_movimientos.filter(fecha__date__gte=date(1900, 1, 1))
 
     if fecha_fin:
         subquery_total_movimientos = subquery_total_movimientos.filter(fecha__date__lte=fecha_fin)
@@ -216,7 +251,7 @@ def construir_datos_estadisticos(request, rol):
     usuarios_con_total = usuarios.annotate(
         total_movimientos=Coalesce(
             Subquery(subquery_total_movimientos, output_field=IntegerField()),
-            Value(0),
+            Value(0, output_field=IntegerField()),
         )
     )
 
@@ -248,14 +283,25 @@ def construir_datos_estadisticos(request, rol):
         .order_by("-total", "hora")[:5]
     )
 
-    usuarios_frecuentes = usuarios_con_total.order_by("-total_movimientos", "nombre", "apellido")[:5]
-    usuarios_menos = usuarios_con_total.order_by("total_movimientos", "nombre", "apellido")[:5]
+    usuarios_frecuentes = usuarios_con_total.order_by(
+        "-total_movimientos",
+        "nombre",
+        "apellido",
+    )[:5]
+
+    usuarios_menos = usuarios_con_total.order_by(
+        "total_movimientos",
+        "nombre",
+        "apellido",
+    )[:5]
+
     usuarios_sin_movimientos = usuarios_con_total.filter(total_movimientos=0).count()
 
     ultimo_movimiento_usuario = Movimiento.objects.filter(usuario=OuterRef("pk"))
 
     if fecha_inicio:
         ultimo_movimiento_usuario = ultimo_movimiento_usuario.filter(fecha__date__gte=fecha_inicio)
+
     if fecha_fin:
         ultimo_movimiento_usuario = ultimo_movimiento_usuario.filter(fecha__date__lte=fecha_fin)
 
@@ -278,8 +324,14 @@ def construir_datos_estadisticos(request, rol):
     movimientos_base = Movimiento.objects.filter(usuario__in=usuarios)
 
     conteo_hoy = movimientos_base.filter(fecha__date=hoy).count()
-    conteo_semana = movimientos_base.filter(fecha__week=iso.week, fecha__year=iso.year).count()
-    conteo_mes = movimientos_base.filter(fecha__month=hoy.month, fecha__year=hoy.year).count()
+    conteo_semana = movimientos_base.filter(
+        fecha__week=iso.week,
+        fecha__year=iso.year,
+    ).count()
+    conteo_mes = movimientos_base.filter(
+        fecha__month=hoy.month,
+        fecha__year=hoy.year,
+    ).count()
 
     promedio_ingresos_dia = 0
 
@@ -321,13 +373,35 @@ def construir_datos_estadisticos(request, rol):
         .order_by("-fecha")[:10]
     )
 
+    secciones_estadistico = obtener_secciones_estadistico(request)
+    estadistico_generado = bool(request.GET.get("generar_estadistico"))
+
     hoy_local = timezone.localdate()
     ayer_local = hoy_local - timedelta(days=1)
 
-    ingresos_hoy = Movimiento.objects.filter(usuario__in=usuarios, fecha__date=hoy_local, tipo="ingreso").count()
-    ingresos_ayer = Movimiento.objects.filter(usuario__in=usuarios, fecha__date=ayer_local, tipo="ingreso").count()
-    salidas_hoy = Movimiento.objects.filter(usuario__in=usuarios, fecha__date=hoy_local, tipo="salida").count()
-    salidas_ayer = Movimiento.objects.filter(usuario__in=usuarios, fecha__date=ayer_local, tipo="salida").count()
+    ingresos_hoy = Movimiento.objects.filter(
+        usuario__in=usuarios,
+        fecha__date=hoy_local,
+        tipo="ingreso",
+    ).count()
+
+    ingresos_ayer = Movimiento.objects.filter(
+        usuario__in=usuarios,
+        fecha__date=ayer_local,
+        tipo="ingreso",
+    ).count()
+
+    salidas_hoy = Movimiento.objects.filter(
+        usuario__in=usuarios,
+        fecha__date=hoy_local,
+        tipo="salida",
+    ).count()
+
+    salidas_ayer = Movimiento.objects.filter(
+        usuario__in=usuarios,
+        fecha__date=ayer_local,
+        tipo="salida",
+    ).count()
 
     dif_ingresos = ingresos_hoy - ingresos_ayer
     dif_salidas = salidas_hoy - salidas_ayer
@@ -335,7 +409,11 @@ def construir_datos_estadisticos(request, rol):
     def calcular_porcentaje(actual, anterior):
         if anterior == 0:
             return 100 if actual > 0 else 0
+
         return round(((actual - anterior) / anterior) * 100, 2)
+
+    porc_ingresos = calcular_porcentaje(ingresos_hoy, ingresos_ayer)
+    porc_salidas = calcular_porcentaje(salidas_hoy, salidas_ayer)
 
     return {
         "fecha_inicio": fecha_inicio_txt,
@@ -343,8 +421,8 @@ def construir_datos_estadisticos(request, rol):
         "fecha_inicio_obj": fecha_inicio,
         "fecha_fin_obj": fecha_fin,
         "error_fecha_estadistica": error_fecha_estadistica,
-        "estadistico_generado": bool(request.GET.get("generar_estadistico")),
-        "secciones_estadistico": obtener_secciones_estadistico(request),
+        "estadistico_generado": estadistico_generado,
+        "secciones_estadistico": secciones_estadistico,
         "total_usuarios": total_usuarios,
         "total_movimientos": total_movimientos,
         "total_ingresos": total_ingresos,
@@ -371,6 +449,6 @@ def construir_datos_estadisticos(request, rol):
         "salidas_ayer": salidas_ayer,
         "dif_ingresos": dif_ingresos,
         "dif_salidas": dif_salidas,
-        "porc_ingresos": calcular_porcentaje(ingresos_hoy, ingresos_ayer),
-        "porc_salidas": calcular_porcentaje(salidas_hoy, salidas_ayer),
+        "porc_ingresos": porc_ingresos,
+        "porc_salidas": porc_salidas,
     }

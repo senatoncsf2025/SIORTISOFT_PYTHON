@@ -11,10 +11,10 @@ from .common import (
     ROL_SINGULAR,
     SERIAL_PC_REGEX,
     TITULOS_ROL,
+    redirigir_por_rol,
     validar_acceso_sistema,
     validar_cedula,
     validar_rol_valido,
-    redirigir_por_rol,
 )
 from ..models import Computador, Movimiento, Usuario, Vehiculo
 
@@ -128,7 +128,11 @@ def seccion_view(request, rol):
             errors["cedula"] = f"No existe un {ROL_SINGULAR.get(rol, rol)} activo con esa cédula"
 
     if not errors:
-        ultimo_movimiento = Movimiento.objects.filter(usuario=usuario).order_by("-fecha").first()
+        ultimo_movimiento = (
+            Movimiento.objects.filter(usuario=usuario)
+            .order_by("-fecha")
+            .first()
+        )
 
         if ultimo_movimiento and ultimo_movimiento.tipo == tipo:
             errors["tipo"] = f"No puedes registrar dos {tipo}s consecutivos para este usuario"

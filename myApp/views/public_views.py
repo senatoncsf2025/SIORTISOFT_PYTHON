@@ -2,7 +2,6 @@ import re
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
-from django.utils import timezone
 
 from .common import (
     SERIAL_PC_REGEX,
@@ -44,22 +43,24 @@ def registro_visita_view(request):
             "horario": horario,
         }
 
-        for error in [
-            validar_nombre(nombre, "nombre", True),
-            validar_telefono(telefono, False),
-            validar_cedula(cedula),
-        ]:
-            if error:
-                messages.error(request, error)
-                return render(request, "public/registro_visita.html", context)
+        error = validar_nombre(nombre, "nombre", True)
+        if error:
+            messages.error(request, error)
+            return render(request, "public/registro_visita.html", context)
+
+        error = validar_telefono(telefono, False)
+        if error:
+            messages.error(request, error)
+            return render(request, "public/registro_visita.html", context)
+
+        error = validar_cedula(cedula)
+        if error:
+            messages.error(request, error)
+            return render(request, "public/registro_visita.html", context)
 
         fecha_visita_date, error = parse_fecha(fecha_visita, obligatoria=True)
         if error:
             messages.error(request, "La fecha de visita no es válida")
-            return render(request, "public/registro_visita.html", context)
-
-        if fecha_visita_date < timezone.localdate():
-            messages.error(request, "La fecha de visita no puede ser anterior a hoy")
             return render(request, "public/registro_visita.html", context)
 
         if horario not in ["AM", "PM"]:
@@ -72,11 +73,17 @@ def registro_visita_view(request):
 
         if trae_pc == "1":
             if not serial_pc:
-                messages.error(request, "Debes ingresar los últimos 4 caracteres del serial del PC")
+                messages.error(
+                    request,
+                    "Debes ingresar los últimos 4 caracteres del serial del PC",
+                )
                 return render(request, "public/registro_visita.html", context)
 
             if not re.fullmatch(SERIAL_PC_REGEX, serial_pc):
-                messages.error(request, "El serial del PC debe tener exactamente 4 caracteres alfanuméricos")
+                messages.error(
+                    request,
+                    "El serial del PC debe tener exactamente 4 caracteres alfanuméricos",
+                )
                 return render(request, "public/registro_visita.html", context)
 
         usuario = Usuario(
@@ -103,7 +110,10 @@ def registro_visita_view(request):
             )
 
         if trae_pc == "1":
-            Computador.objects.create(usuario=usuario, serial=serial_pc)
+            Computador.objects.create(
+                usuario=usuario,
+                serial=serial_pc,
+            )
 
         messages.success(request, "La visita fue registrada correctamente")
         return redirect("registro_visita")

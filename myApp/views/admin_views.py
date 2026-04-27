@@ -1,225 +1,267 @@
-import re
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
-from django.utils import timezone
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from .common import (
+    ROLES_VALIDOS,
     ROL_SINGULAR,
-    SERIAL_PC_REGEX,
     TITULOS_ROL,
-    validar_acceso_sistema,
-    validar_cedula,
-    validar_rol_valido,
+    crear_usuario_desde_form_data,
+    extraer_form_data,
+    get_role_context,
+    get_role_queryset,
+    normalizar_genero,
+    normalizar_tipo_usuario,
+    poblar_usuario_desde_form,
     redirigir_por_rol,
+    validar_admin,
+    validar_form_usuario,
+    validar_rol_valido,
 )
-from ..models import Computador, Movimiento, Usuario, Vehiculo
+from .report_data import construir_datos_estadisticos, construir_datos_reporte
+from ..models import Usuario
 
 
+# =========================================================
+# PANEL ADMIN
+# =========================================================
 @login_required
-def dashboard_view(request):
-    if not validar_acceso_sistema(request):
+def index2(request):
+    if request.user.rol != "admin":
+        messages.error(request, "No tienes acceso al panel de administrador")
         return redirigir_por_rol(request.user)
 
-    return render(request, "dashboard.html")
+    cedula = request.GET.get("cedula", "").strip()
+    nombre = request.GET.get("nombre", "").strip()
+    apellido = request.GET.get("apellido", "").strip()
+    subrol_filtro = request.GET.get("subrol", "").strip()
+    tipo_usuario = normalizar_tipo_usuario(request.GET.get("tipo_usuario", "").strip())
+    genero = normalizar_genero(request.GET.get("genero", "").strip())
+
+    usuarios = Usuario.objects.all().order_by("nombre", "apellido")
+
+    if cedula:
+        usuarios = usuarios.filter(cedula__icontains=cedula)
+
+    if nombre:
+        usuarios = usuarios.filter(nombre__icontains=nombre)
+
+    if apellido:
+        usuarios = usuarios.filter(apellido__icontains=apellido)
+
+    if subrol_filtro:
+        usuarios = usuarios.filter(subrol=subrol_filtro)
+
+    if tipo_usuario:
+        usuarios = usuarios.filter(tipo_usuario=tipo_usuario)
+
+    if genero:
+        usuarios = usuarios.filter(genero=genero)
+
+    secciones = []
+
+    for subrol in ROLES_VALIDOS:
+        usuarios_subrol = usuarios.filter(subrol=subrol)
+
+        if usuarios_subrol.exists():
+            secciones.append(
+                {
+                    "titulo": TITULOS_ROL.get(subrol, subrol.title()),
+                    "usuarios": usuarios_subrol,
+                    "rol": subrol,
+                }
+            )
+
+    paginator = Paginator(secciones, 3)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "page_obj": page_obj,
+        "cedula": cedula,
+        "nombre": nombre,
+        "apellido": apellido,
+        "subrol_filtro": subrol_filtro,
+        "tipo_usuario": tipo_usuario,
+        "genero": genero,
+        "roles_validos": ROLES_VALIDOS,
+    }
+
+    return render(request, "index2.html", context)
 
 
+# =========================================================
+# CRUD ADMIN
+# =========================================================
 @login_required
-def seccion_view(request, rol):
-    if not validar_acceso_sistema(request):
+def role_index(request, rol):
+    if not validar_admin(request):
         return redirigir_por_rol(request.user)
 
     if not validar_rol_valido(rol):
-        messages.error(request, "La sección solicitada no existe")
-        return redirect("dashboard")
+        messages.error(request, "El rol solicitado no es válido")
+        return redirect("index2")
 
-    context = {
-        "rol": rol,
-        "rol_titulo": TITULOS_ROL.get(rol, rol.title()),
-        "rol_singular": ROL_SINGULAR.get(rol, rol),
-        "errors": {},
-        "cedula": "",
-        "tipo": "",
-        "observaciones": "",
-        "trae_vehiculo": "0",
-        "placa": "",
-        "marca": "",
-        "modelo": "",
-        "color": "",
-        "trae_pc": "0",
-        "serial": "",
-        "mostrar_form_consulta": False,
-        "mostrar_form_registro": False,
+    base_qs = get_role_queryset(rol)
+
+    buscar_nombre = request.GET.get("buscar_nombre", "").strip()
+    buscar_cedula = request.GET.get("buscar_cedula", "").strip()
+
+    usuarios_filtrados = base_qs
+
+    if buscar_nombre:
+        usuarios_filtrados = usuarios_filtrados.filter(nombre__icontains=buscar_nombre)
+
+    if buscar_cedula:
+        usuarios_filtrados = usuarios_filtrados.filter(cedula__icontains=buscar_cedula)
+
+    filtros_busqueda = {
+        "buscar_nombre": buscar_nombre,
+        "buscar_cedula": buscar_cedula,
     }
 
-    if request.method != "POST":
-        return render(request, f"secciones/{rol}.html", context)
+    datos_reporte = construir_datos_reporte(request, rol, base_qs)
+    datos_estadisticos = construir_datos_estadisticos(request, rol)
 
-    formulario = request.POST.get("formulario", "consulta").strip()
+    paginator = Paginator(usuarios_filtrados, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
 
-    if formulario == "registro":
-        context["mostrar_form_registro"] = True
-        context["mostrar_form_consulta"] = False
-        return render(request, f"secciones/{rol}.html", context)
-
-    cedula = request.POST.get("cedula", "").strip()
-    tipo = request.POST.get("tipo", "").strip()
-    observaciones = request.POST.get("observaciones", "").strip()
-    trae_vehiculo = request.POST.get("trae_vehiculo", "0").strip()
-    placa = request.POST.get("placa", "").strip().upper()
-    marca = request.POST.get("marca", "").strip()
-    modelo = request.POST.get("modelo", "").strip()
-    color = request.POST.get("color", "").strip()
-    trae_pc = request.POST.get("trae_pc", "0").strip()
-    serial = request.POST.get("serial", "").strip().upper()
-
-    context.update(
+    context = get_role_context(
+        rol,
         {
-            "cedula": cedula,
-            "tipo": tipo,
-            "observaciones": observaciones,
-            "trae_vehiculo": trae_vehiculo,
-            "placa": placa,
-            "marca": marca,
-            "modelo": modelo,
-            "color": color,
-            "trae_pc": trae_pc,
-            "serial": serial,
-        }
+            "usuarios": page_obj,
+            "page_obj": page_obj,
+            "filtros_busqueda": filtros_busqueda,
+            **datos_reporte,
+            **datos_estadisticos,
+        },
     )
 
-    errors = {}
-
-    error = validar_cedula(cedula)
-    if error:
-        errors["cedula"] = error
-
-    if tipo not in ["ingreso", "salida"]:
-        errors["tipo"] = "Debes seleccionar un tipo de movimiento válido"
-
-    if trae_vehiculo not in ["0", "1"]:
-        errors["placa"] = "Debes seleccionar una opción válida para vehículo"
-
-    if trae_pc not in ["0", "1"]:
-        errors["serial"] = "Debes seleccionar una opción válida para PC"
-
-    if trae_vehiculo == "1" and not placa:
-        errors["placa"] = "Debes ingresar la placa del vehículo"
-
-    if trae_pc == "1":
-        if not serial:
-            errors["serial"] = "Debes ingresar el serial del PC"
-        elif not re.fullmatch(SERIAL_PC_REGEX, serial):
-            errors["serial"] = "El serial del PC debe tener exactamente 4 caracteres alfanuméricos"
-
-    usuario = None
-
-    if not errors:
-        usuario = Usuario.objects.filter(
-            cedula=cedula,
-            subrol=rol,
-            activo=True,
-        ).first()
-
-        if not usuario:
-            errors["cedula"] = f"No existe un {ROL_SINGULAR.get(rol, rol)} activo con esa cédula"
-
-    if not errors:
-        ultimo_movimiento = Movimiento.objects.filter(usuario=usuario).order_by("-fecha").first()
-
-        if ultimo_movimiento and ultimo_movimiento.tipo == tipo:
-            errors["tipo"] = f"No puedes registrar dos {tipo}s consecutivos para este usuario"
-
-    if errors:
-        context["errors"] = errors
-        context["mostrar_form_consulta"] = True
-        context["mostrar_form_registro"] = False
-        return render(request, f"secciones/{rol}.html", context)
-
-    with transaction.atomic():
-        Movimiento.objects.create(
-            usuario=usuario,
-            tipo=tipo,
-            observaciones=observaciones or None,
-            trae_vehiculo=(trae_vehiculo == "1"),
-            placa=placa or None,
-            marca=marca or None,
-            modelo=modelo or None,
-            color=color or None,
-            trae_pc=(trae_pc == "1"),
-            serial_pc=serial or None,
-            registrado_por=request.user,
-        )
-
-        if trae_vehiculo == "1":
-            vehiculo_obj, _ = Vehiculo.objects.get_or_create(
-                usuario=usuario,
-                defaults={
-                    "placa": placa,
-                    "marca": marca or None,
-                    "modelo": modelo or None,
-                    "color": color or None,
-                },
-            )
-            vehiculo_obj.placa = placa
-            vehiculo_obj.marca = marca or None
-            vehiculo_obj.modelo = modelo or None
-            vehiculo_obj.color = color or None
-            vehiculo_obj.save()
-        else:
-            Vehiculo.objects.filter(usuario=usuario).delete()
-
-        if trae_pc == "1":
-            computador_obj, _ = Computador.objects.get_or_create(
-                usuario=usuario,
-                defaults={"serial": serial},
-            )
-            computador_obj.serial = serial
-            computador_obj.save()
-        else:
-            Computador.objects.filter(usuario=usuario).delete()
-
-    messages.success(
-        request,
-        f"Movimiento de {tipo} registrado correctamente para {usuario.nombre_completo}",
-    )
-
-    context.update(
-        {
-            "cedula": "",
-            "tipo": "",
-            "observaciones": "",
-            "trae_vehiculo": "0",
-            "placa": "",
-            "marca": "",
-            "modelo": "",
-            "color": "",
-            "trae_pc": "0",
-            "serial": "",
-            "errors": {},
-            "mostrar_form_consulta": True,
-            "mostrar_form_registro": False,
-        }
-    )
-
-    return render(request, f"secciones/{rol}.html", context)
+    return render(request, f"crud/{rol}/index.html", context)
 
 
 @login_required
-def dashboard_data(request):
-    hoy = timezone.localdate()
+def role_create(request, rol):
+    if not validar_admin(request):
+        return redirigir_por_rol(request.user)
 
-    data = {
-        "usuarios": Usuario.objects.count(),
-        "estudiantes": Usuario.objects.filter(subrol="estudiantes").count(),
-        "docentes": Usuario.objects.filter(subrol="docentes").count(),
-        "visitantes": Usuario.objects.filter(
-            subrol="visitantes",
-            fecha_visita=hoy,
-        ).count(),
-    }
+    if not validar_rol_valido(rol):
+        messages.error(request, "El rol solicitado no es válido")
+        return redirect("index2")
 
-    return JsonResponse(data)
+    form_data = {}
+
+    if request.method == "POST":
+        form_data = extraer_form_data(request)
+
+        error = validar_form_usuario(form_data, rol)
+
+        if error:
+            messages.error(request, error)
+            return render(
+                request,
+                f"crud/{rol}/create.html",
+                get_role_context(rol, {"form_data": form_data}),
+            )
+
+        nuevo_rol = "vigilante" if rol == "vigilantes" else "persona"
+
+        crear_usuario_desde_form_data(
+            form_data,
+            rol_sistema=nuevo_rol,
+            subrol=rol,
+            registrado_por=request.user,
+            activo=True,
+        )
+
+        messages.success(
+            request,
+            f"{ROL_SINGULAR.get(rol, rol).capitalize()} creado correctamente",
+        )
+
+        return redirect(f"{rol}.index")
+
+    return render(
+        request,
+        f"crud/{rol}/create.html",
+        get_role_context(rol, {"form_data": form_data}),
+    )
+
+
+@login_required
+def role_edit(request, rol, user_id):
+    if not validar_admin(request):
+        return redirigir_por_rol(request.user)
+
+    if not validar_rol_valido(rol):
+        messages.error(request, "El rol solicitado no es válido")
+        return redirect("index2")
+
+    usuario = get_object_or_404(Usuario, id=user_id, subrol=rol)
+
+    if request.method == "POST":
+        form_data = extraer_form_data(request)
+
+        error = validar_form_usuario(form_data, rol, usuario_id=usuario.id)
+
+        if error:
+            messages.error(request, error)
+            poblar_usuario_desde_form(usuario, form_data, rol)
+
+            return render(
+                request,
+                f"crud/{rol}/edit.html",
+                get_role_context(rol, {"usuario": usuario}),
+            )
+
+        poblar_usuario_desde_form(usuario, form_data, rol)
+        usuario.save()
+
+        messages.success(
+            request,
+            f"{ROL_SINGULAR.get(rol, rol).capitalize()} actualizado correctamente",
+        )
+
+        return redirect(f"{rol}.index")
+
+    return render(
+        request,
+        f"crud/{rol}/edit.html",
+        get_role_context(rol, {"usuario": usuario}),
+    )
+
+
+@login_required
+@require_POST
+def role_toggle_estado(request, rol, user_id, activar):
+    if request.user.rol != "admin":
+        return JsonResponse(
+            {"success": False, "message": "No autorizado"},
+            status=403,
+        )
+
+    if not validar_rol_valido(rol):
+        return JsonResponse(
+            {"success": False, "message": "Rol inválido"},
+            status=400,
+        )
+
+    usuario = get_object_or_404(Usuario, id=user_id, subrol=rol)
+    usuario.activo = activar
+    usuario.save(update_fields=["activo"])
+
+    toggle_url_name = f"{rol}.inactivar" if activar else f"{rol}.activar"
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": f"Registro {'activado' if activar else 'inactivado'} correctamente",
+            "activo": usuario.activo,
+            "toggle_url": reverse(toggle_url_name, args=[usuario.id]),
+        }
+    )
